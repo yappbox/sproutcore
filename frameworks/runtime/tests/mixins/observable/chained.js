@@ -16,6 +16,7 @@ test("chained observers on enumerable properties are triggered when the observed
   var child4 = SC.Object.create({ name: "Nancy" });
 
   family.set('momma', momma);
+
   momma.set('children', [child1, child2, child3]);
 
   var observerFiredCount = 0;
@@ -24,7 +25,7 @@ test("chained observers on enumerable properties are triggered when the observed
   });
 
   observerFiredCount = 0;
-  SC.run(function() { momma.get('children').setEach('name', 'Juan'); });
+  SC.run(function() { window.billy = true; momma.get('children').setEach('name', 'Juan'); window.billy = false; });
   equals(observerFiredCount, 3, "observer fired after changing child names");
 
   observerFiredCount = 0;
@@ -38,7 +39,9 @@ test("chained observers on enumerable properties are triggered when the observed
   momma.set('children', []);
 
   observerFiredCount = 0;
+  window.billy = true;
   SC.run(function() { child1.set('name', "Hanna"); });
+  window.billy = false;
   equals(observerFiredCount, 0, "observer did not fire after removing changing property on a removed object");
 });
 

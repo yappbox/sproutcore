@@ -805,10 +805,61 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
     @param {Array} removedObjects the objects that were removed
     @returns {Object} receiver
   */
-  enumerableContentDidChange: function(start, length, delta, addedObjects, removedObjects) {
-    this._setupContentObservers(addedObjects, removedObjects);
+  enumerableContentDidChange: function(start, removedCount, delta, addedCount) {
+    if (start === undefined) { start = 0; }
+    if (removedCount  === undefined) { removedCount = this.get('length'); }
+    if (addedCount === undefined) { addedCount = this.get('length'); }
+    if (delta === undefined) { delta = addedCount - removedCount; }
+
+    this._setupContentObservers(start, addedCount);
+
+    this.notifyEnumerableContentDidChangeObservers(start, addedCount, removedCount);
+
+    this.beginPropertyChanges();
+    this.notifyPropertyChange('length');
     this.notifyPropertyChange('[]') ;
-    this._notifyEnumerableObservers(addedObjects, removedObjects, start);
+    this.endPropertyChanges();
+  },
+
+  _setupPropertyChains: function(start, addedCount) {
+    var chains = this._kvo_enumerable_property_chains;
+
+    if (chains && this.slice) {
+      var idx;
+
+      chains.forEach(function(chain) {
+        chain.notifyPropertyDidChange();
+
+        var addedObjects = this.slice(start, start + addedCount);
+
+        for (idx = 0; idx < addedCount; idx++) {
+          this._clonePropertyChainToItem(chain, addedObjects[idx]);
+        }
+      }, this);
+    }
+  },
+
+  _teardownPropertyChains: function(start, removedCount) {
+    var chains = this._kvo_enumerable_property_chains;
+
+    if (chains && this.slice) {
+      var kvoChainList = '_kvo_enumerable_property_clones', idx;
+
+      chains.forEach(function(chain) {
+        var chainGuid = SC.guidFor(chain), clonedChain, item;
+
+        chain.notifyPropertyDidChange();
+
+        var removedObjects = this.slice(start, start + removedCount);
+
+        for (idx = 0; idx < removedCount; idx++) {
+          item = removedObjects[idx];
+          clonedChain = item[kvoChainList][chainGuid];
+          clonedChain.deactivate();
+          delete item[kvoChainList][chainGuid];
+        }
+      }, this);
+    }
   },
 
   /**
@@ -916,21 +967,77 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
     }, this);
   },
 
-  /**
-    Called when the contents of the enumerable mutates.
+  addEnumerableObservers: function(target, willChangeAction, didChangeAction) {
+    var observers;
 
-    Implementers of classes that mixin SC.Enumerable should ensure that they
-    call enumerableContentDidChange(), which invokes this method automatically.
+    // If the methods are provided as a string, look them up on
+    // the target.
+    if (typeof willChangeAction === 'string') {
+      willChangeAction = target[willChangeAction];
+    }
 
-    @param {Array} addedObjects the array of objects that were added to the enumerable
-    @param {Array} removedObjects the array of objects that were removed from the enumerable
-    @param {Number} index the index at which the mutation occurred
-  */
-  _notifyEnumerableObservers: function(addedObjects, removedObjects, index) {
-    var observers, members, member, memberLoc, membersLength;
+    if (typeof didChangeAction === 'string') {
+      didChangeAction = target[didChangeAction];
+    }
+
+    //@ if (debug)
+    if (willChangeAction !== null && typeof willChangeAction !== 'function') {
+      throw "addEnumerableObservers() expects either a function or null value";
+    }
+
+    if (didChangeAction !== null && typeof didChangeAction !== 'function') {
+      throw "addEnumerableObservers() expects either a function or null value";
+    }
+    //@ end if
+
+    observers = this._kvo_for('_kvo_enumerable_observers_will_change', SC.ObserverSet);
+    observers.add(target, willChangeAction);
+
+    observers = this._kvo_for('_kvo_enumerable_observers_did_change', SC.ObserverSet);
+    observers.add(target, didChangeAction);
+
+    return this;
+  },
+
+  removeEnumerableObservers: function(target, willChangeAction, didChangeAction) {
+    var observers;
+
+    // If the methods are provided as a string, look them up on
+    // the target.
+    if (typeof willChangeAction === 'string') {
+      willChangeAction = target[willChangeAction];
+    }
+
+    if (typeof didChangeAction === 'string') {
+      didChangeAction = target[didChangeAction];
+    }
+
+    observers = this._kvo_enumerable_observers_will_change;
+    if (observers) {
+      observers.remove(target, willChangeAction);
+    }
+
+    observers = this._kvo_enumerable_observers_did_change;
+    if (observers) {
+      observers.remove(target, didChangeAction);
+    }
+
+    return this;
+  },
+
+  notifyEnumerableContentDidChangeObservers: function(start, addedCount, removedCount) {
+    var observers = this._kvo_enumerable_observers_did_change;
+    this._notifyEnumerableContentObservers(observers, start, addedCount, removedCount);
+  },
+
+  notifyEnumerableContentWillChangeObservers: function(start, addedCount, removedCount) {
+    var observers = this._kvo_enumerable_observers_will_change;
+    this._notifyEnumerableContentObservers(observers, start, addedCount, removedCount);
+  },
+
+  _notifyEnumerableContentObservers: function(observers, start, addedCount, removedCount) {
+    var members, member, memberLoc, membersLength;
     var target, method, context;
-
-    observers = this._kvo_enumerable_observers;
 
     if (observers) {
       members = SC.clone(observers.getMembers());
@@ -941,114 +1048,15 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
 
         target = member[0];
         method = member[1];
-        context = member[2];
 
-        method.call(target, addedObjects, removedObjects, index, this, context);
+        method.call(target, start, addedCount, removedCount, this);
       }
     }
   },
 
-  /**
-    Adds an enumerable observer to the enumerable.
-
-    Enumerable observers are called whenever the enumerable's content
-    mutates. For example, adding an object via pushObject(), or replacing
-    objects via replace(), will cause all enumerable observers to be fired.
-
-    Observer methods that you register should have the following signature:
-
-        enumerableDidChange: function(addedObjects, removedObjects, index, source)
-
-    addedObjects will contain an array of the objects added and removedObjects
-    will contain an array of the objects that were removed. The index parameter
-    contains the index at which the mutation occurred.
-
-    The fourth parameter, source, is the enumerable that mutated. This is useful
-    if you register the same observer method on multiple enumerables.
-
-    If you pass a context parameter to addEnumerableObserver(), it will be
-    included when the observer is fired:
-
-        function(addedObjects, removedObjects, sender, context);
-
-    @param {Object} target the target object to invoke
-    @param {String|Function} method the method to invoke
-    @param {Object} context optional context
-
-    @returns {SC.Object} self
-  */
-  addEnumerableObserver: function(target, method, context) {
-    var observers;
-
-    // Normalize parameters. If a function is passed as
-    // target, make it the method.
-    if (method === undefined) {
-      method = target;
-      target = this;
-    }
-
-    // Call the observer in the context of the enumerable
-    // if no explicit target is given.
-    if (!target) { target = this; }
-
-    // If the method is provided as a string, look it up on
-    // the target.
-    if (typeof method === "string") {
-      method = target[method];
-    }
-
-    if (!method) {
-      throw "You must pass a method to addEnumerableObserver()";
-    }
-
-    observers = this._kvo_for('_kvo_enumerable_observers', SC.ObserverSet);
-    observers.add(target, method, context);
-
-    return this;
-  },
-
-  /**
-    Removes an enumerable observer. Expects the same target and method that
-    were used to register the observer.
-
-    @param {Object} target the target object to invoke
-    @param {String|Function} method the method to invoke
-
-    @returns {SC.Object} self
-  */
-  removeEnumerableObserver: function(target, method) {
-    var observers;
-
-    // Normalize parameters. If a function is passed as
-    // target, make it the method.
-    if (method === undefined) {
-      method = target;
-      target = this;
-    }
-
-    // Call the observer in the context of the enumerable
-    // if no explicit target is given.
-    if (!target) { target = this; }
-
-    // If the method is provided as a string, look it up on
-    // the target.
-    if (typeof method === "string") {
-      method = target[method];
-    }
-
-    if (!method) {
-      throw "You must pass a method to removeEnumerableObserver()";
-    }
-
-    observers = this._kvo_enumerable_observers;
-
-    if (observers) {
-      observers.remove(target, method);
-    } else {
-      throw "%@: Can't remove observers if no observer has been added.";
-    }
-
-    return this;
+  enumerableContentWillChange: function(start, addedCount, removedCount) {
+    this._setupContentObservers(start, removedCount);
+    this.notifyEnumerableContentWillChangeObservers(start, addedCount, removedCount);
   },
 
   /**
@@ -1091,25 +1099,13 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
     @param {Array} addedObjects the array of objects that have been added
     @param {Array} removedObjects the array of objects that have been removed
   */
-  _setupContentObservers: function(addedObjects, removedObjects) {
-    if (!addedObjects) { addedObjects = this; }
-    if (!removedObjects) { removedObjects = []; }
+  _setupContentObservers: function(start, len) {
+    // TODO: Either convert this into an array, or implement
+    // this for all observers
 
-    // Check the last values passed and skip this step if they are
-    // the same.
-    //
-    // TODO: This is obviously a suboptimal workaround to the fact that
-    // enumerableContentDidChange can get called twice when implementing
-    // SC.ArrayController. We should revisit how enumerableContentDidChange
-    // works in that context. --TD
-    var lastAdded = this._lastAdded;
-    var lastRemoved = this._lastRemoved;
+    if (!this.slice) { return; }
 
-    if(lastAdded === addedObjects) { addedObjects = []; }
-    if(lastRemoved === removedObjects) { removedObjects = []; }
-
-    this._lastAdded = addedObjects;
-    this._lastRemoved = removedObjects;
+    var addedObjects = this.slice(start, start + len);
 
     var observedKeys = this._kvo_for('_kvo_content_observed_keys', SC.CoreSet);
     var kvoKey;
@@ -1121,35 +1117,32 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
       observedKeys.forEach(function(key) {
         kvoKey = SC.keyFor('_kvo_content_observers', key);
 
-        // Loop through removed objects and remove any enumerable observers that
-        // belong to them.
-        removedObjects.forEach(function(item) {
-          item._kvo_for(kvoKey).forEach(function(observer) {
-            observer.destroyChain();
-          }, this);
-        }, this);
-        var lastObserver;
-
         // Get all original ChainObservers associated with the key
         this._kvo_for(kvoKey).forEach(function(observer) {
-          // if there are no added objects or removed objects, this
-          // object is a proxy (like ArrayController), which does
-          // not currently receive the added or removed objects.
-          // As a result, walk down to the last element of the
-          // chain and trigger its propertyDidChange, which will
-          // invalidate anything listening.
-          if(!addedObjects.get('length') && !removedObjects.get('length')) {
-            lastObserver = observer;
-            while(lastObserver.next) { lastObserver = lastObserver.next; }
-            lastObserver.propertyDidChange();
-          } else {
-            addedObjects.forEach(function(item) {
-              this._resumeChainObservingForItemWithChainObserver(item, observer);
-            }, this);
-          }
+          addedObjects.forEach(function(item) {
+            this._resumeChainObservingForItemWithChainObserver(item, observer);
+          }, this);
         }, this);
       }, this);
     }
+  },
+
+  _teardownContentObservers: function(start, len) {
+    if (!this.slice) { return; }
+
+    var removedObjects = this.slice(start, start + len);
+
+    var observedKeys = this._kvo_for('_kvo_content_observed_keys', SC.CoreSet);
+
+    observedKeys.forEach(function(key) {
+      kvoKey = SC.keyFor('_kvo_content_observers', key);
+
+      removedObjects.forEach(function(item) {
+        item._kvo_for(kvoKey).forEach(function(observer) {
+          observer.destroyChain();
+        });
+      });
+    });
   },
 
   /**
@@ -1180,7 +1173,7 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
     this._kvo_for(kvoKey).push(chainObserver);
 
     // set up chained observers on the initial content
-    this._setupContentObservers(this);
+    this._setupContentObservers(0, this.get('length'));
   },
 
   /**
@@ -1204,7 +1197,7 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
 
       observers.removeObject(chainObserver);
 
-      this._setupContentObservers([], this);
+      this._teardownContentObservers(0, this.get('length'));
 
       if (observers.length === 0) {
         this._kvo_for('_kvo_content_observed_keys').remove(key);

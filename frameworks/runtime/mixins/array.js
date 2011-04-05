@@ -468,13 +468,13 @@ SC.Array = /** @scope SC.Array.prototype */{
     @param {Array} removedObjects the objects that were removed
     @returns {SC.Array} receiver
   */
-  enumerableContentDidChange: function(start, amt, delta, addedObjects, removedObjects) {
+  enumerableContentDidChange: function(start, removedCount, delta, addedCount) {
+    if(window.billy) debugger;
     var rangeob = this._array_rangeObservers,
         oldlen  = this._array_oldLength,
         newlen, length, changes ;
 
     this.beginPropertyChanges();
-    this.notifyPropertyChange('length'); // flush caches
 
     // schedule info for range observers
     if (rangeob && rangeob.length>0) {
@@ -488,11 +488,11 @@ SC.Array = /** @scope SC.Array.prototype */{
       // new and old length.
       if (start === undefined) start = 0;
       if (delta === undefined) delta = newlen - oldlen ;
-      if (delta !== 0 || amt === undefined) {
+      if (delta !== 0 || removedCount === undefined) {
         length = newlen - start ;
         if (delta<0) length -= delta; // cover removed range as well
       } else {
-        length = amt ;
+        length = removedCount ;
       }
 
       changes = this._array_rangeChanges;
@@ -500,14 +500,9 @@ SC.Array = /** @scope SC.Array.prototype */{
       changes.add(start, length);
     }
 
-    this._setupContentObservers(addedObjects, removedObjects);
-    this.notifyPropertyChange('[]') ;
+    // this is essentially a call to super() to SC.Enumerable
+    SC.Enumerable.enumerableContentDidChange.call(this, start, removedCount, delta, addedCount);
     this.endPropertyChanges();
-
-    // Only notify enumerable observers if we have enough information to do so.
-    if (addedObjects && removedObjects) {
-      this._notifyEnumerableObservers(addedObjects, removedObjects, start);
-    }
 
     return this ;
   },
@@ -615,22 +610,20 @@ if (!Array.prototype.lastIndexOf) {
 
     // primitive for array support.
     replace: function(idx, amt, objects) {
-      var removedObjects;
+      if (this.isFrozen) { throw SC.FROZEN_ERROR ; }
 
-      if (this.isFrozen) throw SC.FROZEN_ERROR ;
+      var len = objects ? SC.get(objects, 'length') : 0;
+
+      this.enumerableContentWillChange(idx, len, amt) ;
+
       if (!objects || objects.length === 0) {
-        removedObjects = this.splice(idx, amt) ;
+        this.splice(idx, amt) ;
       } else {
         var args = [idx, amt].concat(objects) ;
-        removedObjects = this.splice.apply(this,args) ;
+        this.splice.apply(this,args) ;
       }
 
-      // if we replaced exactly the same number of items, then pass only the
-      // replaced range.  Otherwise, pass the full remaining array length
-      // since everything has shifted
-      var len = objects ? (objects.get ? objects.get('length') : objects.length) : 0;
-      objects = SC.isArray(objects) ? objects : [objects];
-      this.enumerableContentDidChange(idx, amt, len - amt, objects, removedObjects) ;
+      this.enumerableContentDidChange(idx, amt, len - amt, len) ;
       return this ;
     },
 

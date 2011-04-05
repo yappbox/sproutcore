@@ -45,7 +45,9 @@ SC.ArraySuite.define(function(T) {
     var before = T.expected(2), 
         after   = [before[1]];
     
+    window.billy = true;
     obj.replace(0,0,before);
+    window.billy = false;
     observer.observe('[]', 'length') ;
     
     obj.removeAt(0);

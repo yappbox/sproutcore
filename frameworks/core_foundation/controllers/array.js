@@ -270,6 +270,11 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     return content ? content.objectAt(idx) : undefined ;
   },
 
+  slice: function(beginIndex, endIndex) {
+    var content = this._scac_observableContent();
+    return content ? content.slice(beginIndex, endIndex) : [];
+  },
+
   /** @private
     Forwards a replace on to the content, but only if reordering is allowed.
   */
@@ -406,7 +411,8 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
         oldlen = this._scac_length || 0,
         func   = this._scac_rangeDidChange,
         efunc  = this._scac_enumerableDidChange,
-        cfunc  = this._scac_enumerableContentDidChange,
+        cdfunc = this._scac_enumerableContentDidChange,
+        cwfunc = this._scac_enumerableContentWillChange,
         sfunc  = this._scac_contentStatusDidChange,
         ro     = this._scac_rangeObserver,
         newlen;
@@ -415,10 +421,8 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 
     // teardown old observer
     if (last) {
-      if (last.isSCArray) {
-        if (ro) { last.removeRangeObserver(ro); }
-        last.removeEnumerableObserver(this, cfunc);
-      }
+      // if (last.isSCArray && ro) { last.removeRangeObserver(ro); }
+      if (last.isSCArray) { last.removeEnumerableObservers(this, cwfunc, cdfunc); }
       else if (last.isEnumerable) { last.removeObserver('[]', this, efunc); }
       last.removeObserver('status', this, sfunc);
     }
@@ -433,8 +437,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     // also, calculate new length.  do it manually instead of using
     // get(length) because we want to avoid computed an ordered array.
     if (cur) {
-      if (!orders && cur.isSCArray) { ro = cur.addRangeObserver(null, this, func); }
-      if (cur.isSCArray) { cur.addEnumerableObserver(this, cfunc); }
+      if (cur.isSCArray) { cur.addEnumerableObservers(this, cwfunc, cdfunc); }
       else if (cur.isEnumerable) { cur.addObserver('[]', this, efunc); }
       newlen = cur.isEnumerable ? cur.get('length') : 1;
       cur.addObserver('status', this, sfunc);
@@ -448,7 +451,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     // finally, notify enumerable content has changed.
     this._scac_length = newlen;
     this._scac_contentStatusDidChange();
-    this.enumerableContentDidChange(0, newlen, newlen - oldlen, this, last||[]);
+    this.enumerableContentDidChange(0, 0, newlen, newlen );
     this.updateSelectionAfterContentChange();
   }.observes('content'),
 
@@ -489,34 +492,14 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     @param {Array} removedObject the array of objects that were removed
     @param {Number} start the index at which the positions occurred
   */
-  _scac_enumerableContentDidChange: function(addedObjects, removedObjects, start) {
-    var enumerableChanges = this._scac_enumerableChanges || [];
-
-    enumerableChanges.push([addedObjects, removedObjects, start]);
-
-    this._scac_enumerableChanges = enumerableChanges;
-    this.invokeOnce(this._scac_propagateEnumerableObservers);
-
-    this.setupPropertyChainsForEnumerableContent(addedObjects, removedObjects);
+  _scac_enumerableContentDidChange: function(start, addedCount, removedCount) {
+    this.enumerableContentDidChange(start, removedCount, addedCount-removedCount, addedCount);
+    this._setupPropertyChains(start, addedCount);
   },
 
-  /**
-    @private
-
-    At the end of the run loop, notifies enumerable observers on this array
-    controller of changes we received from the content object.
-  */
-  _scac_propagateEnumerableObservers: function() {
-    var enumerableChanges = this._scac_enumerableChanges;
-    var idx, len, change;
-
-    len = enumerableChanges.get('length');
-    for (idx = 0; idx < len; idx++) {
-      change = enumerableChanges[idx];
-      this._notifyEnumerableObservers(change[0], change[1], change[2]);
-    }
-
-    this._scac_enumerableChanges = null;
+  _scac_enumerableContentWillChange: function(start, addedCount, removedCount) {
+    this.enumerableContentWillChange(start, addedCount, removedCount);
+    this._teardownPropertyChains(start, removedCount);
   },
 
   /** @private
