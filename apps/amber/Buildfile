@@ -1,0 +1,1 @@
+config :amber, :required => :runtime, :theme => nil

@@ -1,4 +1,4 @@
-/**
+/*!
  * @license
  * ==========================================================================
  * SproutCore -- JavaScript Application Framework
