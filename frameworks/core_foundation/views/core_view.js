@@ -5,11 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('system/browser');
-sc_require('system/event');
 sc_require('system/responder') ;
-sc_require('system/theme');
-
 sc_require('system/string') ;
 
 SC.CoreView = SC.Responder.extend(
@@ -293,7 +289,7 @@ SC.CoreView = SC.Responder.extend(
 
     if (SC.none(firstTime)) { firstTime = YES; }
 
-    this.applyAttributesToContext(context);
+    this._renderElementSettings(context);
 
     // If the render method takes two parameters, we assume that it is a
     // legacy implementation that takes context and firstTime. If it has only
@@ -325,7 +321,7 @@ SC.CoreView = SC.Responder.extend(
     this.endPropertyChanges() ;
   },
 
-  _renderElementSettings: function(context, firstTime) {
+  _renderElementSettings: function(context) {
     context.resetClassNames();
     context.resetStyles();
 
@@ -432,7 +428,7 @@ SC.CoreView = SC.Responder.extend(
 
     @property {Array}
   */
-  classNames: [],
+  classNames: ['sc-view'],
 
   displayProperties: ['isVisible'],
 
