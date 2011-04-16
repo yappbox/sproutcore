@@ -5,8 +5,6 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('mixins/delegate_support') ;
-
 /**
   @class
 
@@ -38,7 +36,7 @@ sc_require('mixins/delegate_support') ;
 */
 
 SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
-  SC.DelegateSupport, /** @scope SC.SparseArray.prototype */ {
+  /** @scope SC.SparseArray.prototype */ {
 
   // ..........................................................
   // LENGTH SUPPORT
@@ -376,10 +374,15 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     @returns {SC.SparseArray} receiver
   */
   reset: function() {
+    var delegate = this.delegate;
     this._sa_content = null ;
     this._length = null ;
     this.enumerableContentDidChange() ;
-    this.invokeDelegateMethod(this.delegate, 'sparseArrayDidReset', this);
+    if (delegate && delegate.sparseArrayDidReset) {
+      delegate.sparseArrayDidReset(this);
+    } else if (this.sparseArrayDidReset){
+      this.sparseArrayDidReset(this)
+    }
     return this ;
   }
 
