@@ -18,21 +18,6 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport.prototype */{
     return value;
   }.property().idempotent(),
 
-  didCreateLayer: function() {
-    SC.Event.add(this.$('input'), 'focus', this, this.focusIn);
-    SC.Event.add(this.$('input'), 'blur', this, this.focusOut);
-  },
-
-  focusIn: function(event) {
-    this.becomeFirstResponder();
-    this.tryToPerform('focus', event);
-  },
-
-  focusOut: function(event) {
-    this.resignFirstResponder();
-    this.tryToPerform('blur', event);
-  },
-
   /** @private
     Make sure our input value is synced with any bindings.
     In some cases, such as auto-filling, a value can get

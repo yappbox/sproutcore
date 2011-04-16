@@ -7,12 +7,8 @@
 /** @class */
 
 SC.CheckboxSupport = /** @scope SC.CheckboxSupport.prototype */{
-  didCreateLayer: function() {
-    this.$('input').change(jQuery.proxy(function() {
-      SC.RunLoop.begin();
-      this.notifyPropertyChange('value');
-      SC.RunLoop.end();
-    }, this));
+  change: function() {
+    this.notifyPropertyChange('value');
   },
 
   value: function(key, value) {
