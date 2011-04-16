@@ -9,8 +9,6 @@
 
 SC.BENCHMARK_LOG_READY = YES;
 
-sc_require('system/event') ;
-
 SC.mixin({
   isReady: NO,
   
@@ -85,7 +83,7 @@ SC.mixin({
         SC._readyQueue = null;
       }
       
-      if(window.main && !SC.suppressMain && (SC.mode === SC.APP_MODE)) { window.main(); }
+      if(window.main && SC.typeOf(window.main) === SC.T_FUNCTION && !SC.suppressMain && (SC.mode === SC.APP_MODE)) { window.main(); }
       SC.RunLoop.end();
     }
   }
