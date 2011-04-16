@@ -41,7 +41,7 @@ test("default implementation invokes renderChildViews if firstTime = YES", funct
   equals(rendered, 1, 'rendered the child');
   equals(parentRendered, 1);
 
-  view.updateLayer();
+  view.updateElement();
   equals(rendered, 1, 'didn\'t call render again');
   equals(parentRendered, 1, 'didn\'t call the parent\'s render again');
   equals(parentUpdated, 1, 'called the parent\'t update');
@@ -81,7 +81,7 @@ test("default implementation does not invoke renderChildViews if explicitly rend
   equals(parentRendered, 1);
   equals(view.$('div').length, 1);
 
-  view.updateLayer();
+  view.updateElement();
   equals(rendered, 1, 'didn\'t call render again');
   equals(parentRendered, 1, 'didn\'t call the parent\'s render again');
   equals(parentUpdated, 1, 'called the parent\'t update');
@@ -120,7 +120,7 @@ test("should invoke renderChildViews if layer is destroyed then re-rendered", fu
   equals(parentRendered, 1);
   equals(view.$('div').length, 1);
 
-  view.destroyLayer();
+  view.destroyElement();
   view.createElement();
   equals(rendered, 2, 'rendered the child twice');
   equals(parentRendered, 2);
@@ -133,7 +133,7 @@ test("should invoke renderChildViews if layer is destroyed then re-rendered", fu
 
 module("SC.View#renderChildViews");
 
-test("creates a context and then invokes renderToContext or updateLayer on each childView", function() {
+test("creates a context and then invokes renderToContext or updateElement on each childView", function() {
 
   var runCount = 0, curContext, curFirstTime ;
 
@@ -146,7 +146,7 @@ test("creates a context and then invokes renderToContext or updateLayer on each 
       runCount++; // record run
     },
 
-    updateLayer: function() {
+    updateElement: function() {
       runCount++;
     }
   });
@@ -171,7 +171,7 @@ test("creates a context and then invokes renderToContext or updateLayer on each 
   curContext = view.renderContext('div');
   curFirstTime= NO ;
   equals(view.renderChildViews(curContext, curFirstTime), curContext, 'returns context');
-  equals(runCount, 3, 'updateLayer() invoked for each child view');
+  equals(runCount, 3, 'updateElement() invoked for each child view');
 
 });
 
