@@ -108,6 +108,21 @@ SC.CoreView = SC.Responder.extend(
   },
 
   /**
+    Removes the view's element from the element to which it is attached.
+
+    @returns {SC.View} receiver
+  */
+  remove: function() {
+    this.$().remove();
+
+    // What we should really do here is wait until the end of the run loop
+    // to determine if the element has been re-appended to a different element.
+    // In the interim, we will just re-render if that happens. It is more
+    // important than elements get garbage collected.
+    this.destroyElement();
+  },
+
+  /**
     The ID to use when trying to locate the layer in the DOM.  If you do not
     set the layerId explicitly, then the view's GUID will be used instead.
     This ID must be set at the time the view is created.
