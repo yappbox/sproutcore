@@ -12,7 +12,7 @@ sc_require('system/theme');
 
 sc_require('system/string') ;
 
-SC.View = SC.Responder.extend(
+SC.CoreView = SC.Responder.extend(
 /** @scope SC.CoreView.prototype */ {
 
   concatenatedProperties: ['classNames'],
@@ -77,6 +77,34 @@ SC.View = SC.Responder.extend(
     } else {
       return SC.$(sel, elem);
     }
+  },
+
+  /**
+    Appends the view's element to the specified parent element.
+
+    If the view does not have an HTML representation yet, `createElement()`
+    will be called automatically.
+
+    @param {String|DOMElement|jQuery} A selector, element, HTML string, or jQuery object
+    @returns {SC.View} receiver
+  */
+  appendTo: function(target) {
+    var elem = this.get('element');
+    if (!elem) { this.createElement(); }
+
+    this.$().appendTo(target);
+    return this;
+  },
+
+  /**
+    Appends the view's element to the document body. If the view does
+    not have an HTML representation yet, `createElement()` will be called
+    automatically.
+
+    @returns {SC.View} receiver
+  */
+  append: function() {
+    return this.appendTo(document.body);
   },
 
   /**
@@ -149,11 +177,11 @@ SC.View = SC.Responder.extend(
     invokes the same on all child views.
   */
   _notifyDidCreateElement: function() {
-    this.notifyPropertyChange('element');
+    var childViews = this.get('childViews'), childView;
 
     this.didCreateElement() ;
 
-    for (var i=0, l=childView.length; i<l; ++i) {
+    for (var i=0, l=childViews.get('length'); i<l; ++i) {
       childView = childViews[i];
 
       if (!childView) { continue; }
@@ -188,8 +216,7 @@ SC.View = SC.Responder.extend(
 
       // Remove this DOM element from its parent.
       SC.$(elem).remove();
-
-      this.notifyPropertyChange('element');
+      this.set('element', null);
     }
     return this ;
   },
@@ -1053,3 +1080,5 @@ SC.CoreView.mixin(/** @scope SC.View.prototype */ {
   views: {}
 
 }) ;
+
+SC.View = SC.CoreView.extend({});
