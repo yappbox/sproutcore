@@ -48,13 +48,13 @@ test("if view has layout, calls renderLayout with context to update element", fu
 	var view = SC.View.create({
 		renderLayout: function(context) {
 			if (!isTesting) return ;
-			equals(context._elem, this.get('layer'), 'should pass context that will edit layer');
+			equals(context._elem, this.get('element'), 'should pass context that will edit layer');
 			callCount++;
 		}
 	});
 	
-	view.createLayer(); // we need a layer
-	ok(view.get('layer'), 'precond - should have a layer');
+	view.createElement(); // we need a layer
+	ok(view.get('element'), 'precond - should have a layer');
 	
 	isTesting= YES ;
 	view.updateLayout();
@@ -75,7 +75,7 @@ test("if view has NO layout, should not call renderLayout", function() {
 		}
 	});
 	
-	ok(!view.get('layer'), 'precond - should NOT have a layer');
+	ok(!view.get('element'), 'precond - should NOT have a layer');
 	
 	isTesting= YES ;
 	view.updateLayout();

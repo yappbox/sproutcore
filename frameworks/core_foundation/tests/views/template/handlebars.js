@@ -21,7 +21,7 @@ test("template view should call the function of the associated template", functi
     })
   });
 
-  view.createLayer();
+  view.createElement();
 
   ok(view.$('#twas-called').length, "the named template was called");
 });
@@ -43,7 +43,7 @@ test("template view should call the function of the associated template with its
     })
   });
 
-  view.createLayer();
+  view.createElement();
 
   equals("template was called for Tom DAAAALE1. Yea Tom DAAAALE1", view.$('#twas-called').text(), "the named template was called with the view as the data source");
 });
@@ -61,7 +61,7 @@ test("should allow values from normal JavaScript hash objects to be used", funct
     }
   });
 
-  view.createLayer();
+  view.createElement();
 
   equals(view.$().text(), "Señor CFC (and Fido)", "prints out values from a hash");
 });
@@ -88,7 +88,7 @@ test("child views can be inserted using the {{view}} Handlebars helper", functio
     templates: templates
   });
 
-  view.createLayer();
+  view.createElement();
 
   ok(view.$("#hello-world:contains('Hello world!')").length, "The parent view renders its contents");
   ok(view.$("#child-view:contains('Goodbye cruel world?')").length === 1, "The child view renders its content once");
@@ -106,7 +106,7 @@ test("should accept relative paths to views", function() {
     })
   });
 
-  view.createLayer();
+  view.createElement();
 
   equals(view.$().text(), "Hey look, at my cool view");
 });
@@ -138,7 +138,7 @@ test("child views can be inserted inside a bind block", function() {
     templates: templates
   });
 
-  view.createLayer();
+  view.createElement();
 
   ok(view.$("#hello-world:contains('Hello world!')").length, "The parent view renders its contents");
   ok(view.$("aside:contains('Goodbye wot cruel world?')").length === 1, "The child view renders its content once");
@@ -160,7 +160,7 @@ test("SC.TemplateView should update when a property changes and the bind helper 
     })
   });
 
-  view.createLayer();
+  view.createElement();
 
   equals(view.$('#first').text(), "bam", "precond - view renders Handlebars template");
 
@@ -184,7 +184,7 @@ test("SC.TemplateView should update when a property changes and no bind helper i
     })
   });
 
-  view.createLayer();
+  view.createElement();
 
   equals(view.$('#first').text(), "bam", "precond - view renders Handlebars template");
 
@@ -208,7 +208,7 @@ test("SC.TemplateView should update when the property used with the #with helper
     })
   });
 
-  view.createLayer();
+  view.createElement();
 
   equals(view.$('#first').text(), "bam", "precond - view renders Handlebars template");
 
@@ -243,7 +243,7 @@ test("should not update when a property is removed from the view", function() {
     })
   });
 
-  view.createLayer();
+  view.createElement();
 
   equals(view.$('#first').text(), "unicorns", "precond - renders the bound value");
 
@@ -288,7 +288,7 @@ test("Handlebars templates update properties if a content object changes", funct
     })
   });
 
-  view.createLayer();
+  view.createElement();
 
   equals(view.$('h2').text(), "brown coffee", "precond - renders color correctly");
   equals(view.$('#price').text(), '$4', "precond - renders price correctly");
@@ -330,7 +330,7 @@ test("Template updates correctly if a path is passed to the bind helper", functi
     })
   });
 
-  view.createLayer();
+  view.createElement();
 
   equals(view.$('h1').text(), "$4", "precond - renders price");
 
@@ -363,7 +363,7 @@ test("Template updates correctly if a path is passed to the bind helper and the 
     coffee: controller
   });
 
-  view.createLayer();
+  view.createElement();
 
   equals(view.$('h1').text(), "$4", "precond - renders price");
 
@@ -393,7 +393,7 @@ test("should update the block when object passed to #if helper changes", functio
     inception: 'OOOOoooooOOOOOOooooooo'
   });
 
-  view.createLayer();
+  view.createElement();
 
   equals(view.$('h1').text(), "BOOOOOOOONG doodoodoodoodooodoodoodoo", "renders block if a string");
 
@@ -429,7 +429,7 @@ test("should update the block when object passed to #unless helper changes", fun
     doWellInSchool: "Eat your vegetables"
   });
 
-  view.createLayer();
+  view.createElement();
 
   equals(view.$('h1').text(), "", "hides block if true");
 
@@ -466,7 +466,7 @@ test("should update the block when object passed to #if helper changes and an in
     SAD: 'BOONG?'
   });
 
-  view.createLayer();
+  view.createElement();
 
   equals(view.$('h1').text(), "BOONG?", "renders alternate if false");
 
@@ -505,7 +505,7 @@ test("Should insert a localized string if the {{loc}} helper is used", function(
     country: 'Brazil'
   });
 
-  view.createLayer();
+  view.createElement();
   equals(view.$('h1').text(), 'Country: Brasilia', "returns localized value");
 });
 
@@ -574,7 +574,7 @@ test("Template views add a layerId to child views created using the view helper"
     templateName: 'parent'
   });
 
-  view.createLayer();
+  view.createElement();
   var childView = view.getPath('childViews.firstObject');
   equals(view.$().children().first().children().first().attr('id'), childView.get('layerId'));
 });
@@ -591,7 +591,7 @@ test("Template views set the template of their children to a passed block", func
     templateName: 'parent'
   });
 
-  view.createLayer();
+  view.createElement();
   ok(view.$().html().match(/<h1>.*<span>.*<\/span>.*<\/h1>/), "renders the passed template inside the parent template");
 });
 
@@ -607,7 +607,7 @@ test("should pass hash arguments to the view object", function() {
     template: SC.Handlebars.compile('{{#view TemplateTests.HashArgTemplateView fooBinding="TemplateTests.bindTestObject.bar"}}{{foo}}{{/view}}')
   });
 
-  view.createLayer();
+  view.createElement();
 
   SC.run();
 
@@ -627,7 +627,7 @@ test("Child views created using the view helper should have their parent view se
     template: SC.Handlebars.compile(template)
   });
 
-  view.createLayer();
+  view.createElement();
 
   var childView = view.childViews[0].childViews[0];
   equals(childView, childView.childViews[0].parentView, 'parent view is correct');
@@ -642,7 +642,7 @@ test("Child views created using the view helper should have their IDs registered
     template: SC.Handlebars.compile(template)
   });
 
-  view.createLayer();
+  view.createElement();
 
   var childView = view.childViews[0];
   var id = childView.$()[0].id;
@@ -667,7 +667,7 @@ test("Collection views that specify an example view class have their children be
     template: SC.Handlebars.compile('{{#collection "TemplateTests.ExampleViewCollection"}}OHAI{{/collection}}')
   });
 
-  parentView.createLayer();
+  parentView.createElement();
 
   ok(parentView.childViews[0].childViews[0].isCustom, "uses the example view class");
 });
@@ -690,7 +690,7 @@ test("should update boundIf blocks if the conditional changes", function() {
     })
   });
 
-  view.createLayer();
+  view.createElement();
 
   equals(view.$('#first').text(), "bam", "renders block when condition is true");
 
@@ -715,7 +715,7 @@ test("{{view}} id attribute should set id on layer", function() {
     templates: templates
   });
 
-  view.createLayer();
+  view.createElement();
 
   equals(view.$('#bar').length, 1, "adds id attribute to layer");
   equals(view.$('#bar').text(), 'baz', "emits content");
@@ -733,7 +733,7 @@ test("{{view}} class attribute should set class on layer", function() {
     templates: templates
   });
 
-  view.createLayer();
+  view.createElement();
 
   equals(view.$('.bar').length, 1, "adds class attribute to layer");
   equals(view.$('.bar').text(), 'baz', "emits content");
@@ -748,7 +748,7 @@ test("{{view}} should be able to point to a local view", function() {
     })
   });
 
-  view.createLayer();
+  view.createElement();
 
   equals(view.$().text(), "common", "tries to look up view name locally");
 });
@@ -767,7 +767,7 @@ test("should be able to bind view class names to properties", function() {
     templates: templates
   });
 
-  view.createLayer();
+  view.createElement();
 
   equals(view.$('.is-done').length, 1, "dasherizes property and sets class name");
 
@@ -789,7 +789,7 @@ test("should be able to bind element attributes using {{bindAttr}}", function() 
     })
   });
 
-  view.createLayer();
+  view.createElement();
 
   equals(view.$('img').attr('src'), "http://www.sproutcore.com/assets/images/logo.png", "sets src attribute");
   equals(view.$('img').attr('alt'), "The SproutCore Logo", "sets alt attribute");
@@ -841,7 +841,7 @@ test("should be able to bind element attributes using {{bindAttr}} inside a bloc
     })
   });
 
-  view.createLayer();
+  view.createElement();
 
   equals(view.$('img').attr('src'), "http://www.sproutcore.com/assets/images/logo.png", "sets src attribute");
   equals(view.$('img').attr('alt'), "The SproutCore Logo", "sets alt attribute");
@@ -861,7 +861,7 @@ test("should be able to bind class attribute with {{bindAttr}}", function() {
     foo: 'bar'
   });
 
-  view.createLayer();
+  view.createElement();
 
   equals(view.$('img').attr('class'), 'bar', "renders class");
 
@@ -884,7 +884,7 @@ test("should be able to bind boolean element attributes using {{bindAttr}}", fun
     content: content
   });
 
-  view.createLayer();
+  view.createElement();
 
   ok(!view.$('input').attr('disabled'), 'attribute does not exist upon initial render');
   ok(view.$('input').attr('checked'), 'attribute is present upon initial render');
@@ -908,7 +908,7 @@ test("should be able to add multiple classes using {{bindAttr class}}", function
     content: content
   });
 
-  view.createLayer();
+  view.createElement();
 
   ok(view.$('div').hasClass('is-awesome-sauce'), "dasherizes first property and sets classname");
   ok(view.$('div').hasClass('is-also-cool'), "dasherizes second property and sets classname");

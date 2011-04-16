@@ -452,7 +452,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
     ## Example
     
-        SC.Event.trigger(view.get('layer'), 'mousedown');
+        SC.Event.trigger(view.get('element'), 'mousedown');
     
     @param elem {Element} the target element
     @param eventType {String} the event type

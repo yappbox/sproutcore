@@ -157,7 +157,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
     @param {Number} changeIndex the index at which the changes occurred
   */
   arrayContentDidChange: function(start, removedCount, addedCount) {
-    if (!this.get('layer')) { return; }
+    if (!this.get('element')) { return; }
 
     var content       = this.get('content'),
         itemViewClass = this.get('itemViewClass'),
@@ -205,7 +205,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
         view.set('context', view.get(contextProperty));
       }
 
-      itemElem = view.createLayer().$();
+      itemElem = view.createElement().$();
       if (!insertAtElement) {
         elem.append(itemElem);
       } else {
@@ -225,7 +225,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
         content: this
       }));
       this.set('emptyView', view);
-      view.createLayer().$().appendTo(elem);
+      view.createElement().$().appendTo(elem);
       this.childViews = [view];
     }
 

@@ -14,7 +14,7 @@ module("SC.View#layer");
 test("returns null if the view has no layer and no parent view", function() {
   var view = SC.View.create() ;
   equals(view.get('parentView'), null, 'precond - has no parentView');
-  equals(view.get('layer'), null, 'has no layer');
+  equals(view.get('element'), null, 'has no layer');
 });
 
 test("returns null if the view has no layer and parent view has no layer", function() {
@@ -24,18 +24,18 @@ test("returns null if the view has no layer and parent view has no layer", funct
   var view = parent.childViews[0];
   
   equals(view.get('parentView'), parent, 'precond - has parent view');
-  equals(parent.get('layer'), null, 'parentView has no layer');
-  equals(view.get('layer'), null, ' has no layer');
+  equals(parent.get('element'), null, 'parentView has no layer');
+  equals(view.get('element'), null, ' has no layer');
 });
 
 test("returns layer if you set the value", function() {
   var view = SC.View.create();
-  equals(view.get('layer'), null, 'precond- has no layer');
+  equals(view.get('element'), null, 'precond- has no layer');
   
   var dom = document.createElement('div');
   view.set('layer', dom);
   
-  equals(view.get('layer'), dom, 'now has set layer');
+  equals(view.get('element'), dom, 'now has set layer');
   
   dom = null;
 });
@@ -70,17 +70,17 @@ module("SC.View#layer - autodiscovery", {
 });
 
 test("discovers layer if has no layer but parent view does have layer", function() {  
-  equals(parent.get('layer'), parentDom, 'precond - parent has layer');
+  equals(parent.get('element'), parentDom, 'precond - parent has layer');
   ok(!!parentDom.firstChild, 'precond - parentDom has first child');
   
-  equals(child.get('layer'), childDom, 'view discovered child');
+  equals(child.get('element'), childDom, 'view discovered child');
 });
 
 test("once its discovers layer, returns the same element, even if you remove it from the parent view", function() {  
-  equals(child.get('layer'), childDom, 'precond - view discovered child');
+  equals(child.get('element'), childDom, 'precond - view discovered child');
   parentDom.removeChild(childDom) ;
 
-  equals(child.get('layer'), childDom, 'view kept layer cached (i.e. did not do a discovery again)');
+  equals(child.get('element'), childDom, 'view kept layer cached (i.e. did not do a discovery again)');
 });
 
 module("SC.View#layer - destroying");
@@ -115,29 +115,29 @@ module("SC.View#$", {
 
 test("returns an empty CQ object if no layer", function() {
   var v = SC.View.create();
-  ok(!v.get('layer'), 'precond - should have no layer');
+  ok(!v.get('element'), 'precond - should have no layer');
   equals(v.$().size(), 0, 'should return empty CQ object');
   equals(v.$('span').size(), 0, 'should return empty CQ object even if filter passed');
 });
 
 test("returns CQ object selecting layer if provided", function() {
-  ok(view.get('layer'), 'precond - should have layer');
+  ok(view.get('element'), 'precond - should have layer');
   
   var cq = view.$();
   equals(cq.size(), 1, 'view.$() should have one element');
-  equals(cq.get(0), view.get('layer'), 'element should be layer');
+  equals(cq.get(0), view.get('element'), 'element should be layer');
 });
 
 test("returns CQ object selecting element inside layer if provided", function() {
-  ok(view.get('layer'), 'precond - should have layer');
+  ok(view.get('element'), 'precond - should have layer');
   
   var cq = view.$('span');
   equals(cq.size(), 1, 'view.$() should have one element');
-  equals(cq.get(0).parentNode, view.get('layer'), 'element should be in layer');
+  equals(cq.get(0).parentNode, view.get('element'), 'element should be in layer');
 });
 
 test("returns empty CQ object if filter passed that does not match item in parent", function() {
-  ok(view.get('layer'), 'precond - should have layer');
+  ok(view.get('element'), 'precond - should have layer');
   
   var cq = view.$('body'); // would normally work if not scoped to view
   equals(cq.size(), 0, 'view.$(body) should have no elements');

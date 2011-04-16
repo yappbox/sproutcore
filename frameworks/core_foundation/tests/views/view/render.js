@@ -37,7 +37,7 @@ test("default implementation invokes renderChildViews if firstTime = YES", funct
     })
   });
 
-  view.createLayer();
+  view.createElement();
   equals(rendered, 1, 'rendered the child');
   equals(parentRendered, 1);
 
@@ -76,7 +76,7 @@ test("default implementation does not invoke renderChildViews if explicitly rend
     })
   });
 
-  view.createLayer();
+  view.createElement();
   equals(rendered, 1, 'rendered the child once');
   equals(parentRendered, 1);
   equals(view.$('div').length, 1);
@@ -115,13 +115,13 @@ test("should invoke renderChildViews if layer is destroyed then re-rendered", fu
     })
   });
 
-  view.createLayer();
+  view.createElement();
   equals(rendered, 1, 'rendered the child once');
   equals(parentRendered, 1);
   equals(view.$('div').length, 1);
 
   view.destroyLayer();
-  view.createLayer();
+  view.createElement();
   equals(rendered, 2, 'rendered the child twice');
   equals(parentRendered, 2);
   equals(view.$('div').length, 1);

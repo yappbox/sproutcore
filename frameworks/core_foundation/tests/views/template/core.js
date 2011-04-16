@@ -27,7 +27,7 @@ test("template view should call the function of the associated template", functi
     })
   });
 
-  view.createLayer();
+  view.createElement();
 
   ok(view.$('#twas-called').length, "the named template was called");
 });
@@ -47,7 +47,7 @@ test("template view should call the function of the associated template with its
     })
   });
 
-  view.createLayer();
+  view.createElement();
 
   equals("template was called for Tom DAAAALE", view.$('#twas-called').text(), "the named template was called with the view as the data source");
 });
@@ -55,7 +55,7 @@ test("template view should call the function of the associated template with its
 test("template view defaults to a noop template", function() {
   var view;
   view = SC.TemplateView.create({});
-  view.createLayer();
+  view.createElement();
 
   equals(view.$().html(), '', "view div should be empty");
 });
@@ -79,7 +79,7 @@ test("should add a 'sc-hidden' class to a template view when isVisible is true",
 
   view.set('template', function() { return "foo"; });
 
-  view.createLayer();
+  view.createElement();
   ok(!view.$().hasClass('sc-hidden'), "does not have hidden class applied");
 
   SC.run(function() { view.set('isVisible', NO); });
@@ -98,7 +98,7 @@ test("should add a 'sc-hidden' class to template views if isVisible is false bef
 
   view.set('template', function() { return "foo"; });
 
-  view.createLayer();
+  view.createElement();
   ok(view.$().hasClass('sc-hidden'), "adds hidden class when rendering");
   $(document.body).append(view.$());
   ok(!view.$().is(':visible'), "should be hidden when hidden class is added");

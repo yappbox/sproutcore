@@ -26,11 +26,11 @@ test("creating a collection view works", function() {
   var dlCollectionView  = CollectionView.create({ tagName: "dl", itemView: DefinitionTermChildView });
   var customTagCollectionView = CollectionView.create({ tagName: "p" })
   
-  defaultCollectionView.createLayer();
-  ulCollectionView.createLayer();
-  olCollectionView.createLayer();
-  dlCollectionView.createLayer();
-  customTagCollectionView.createLayer();
+  defaultCollectionView.createElement();
+  ulCollectionView.createElement();
+  olCollectionView.createElement();
+  dlCollectionView.createElement();
+  customTagCollectionView.createElement();
   
   ok(defaultCollectionView.$().is("ul"), "Unordered list collection view was rendered (Default)");
   equals(defaultCollectionView.$('li').length, 1, "List item view was rendered (Default)");
@@ -57,7 +57,7 @@ test("passing a block to the collection helper sets it as the template for examp
     template: SC.Handlebars.compile('{{#collection "TemplateTests.CollectionTestView"}} <aside></aside> {{/collection}}')
   });
 
-  view.createLayer();
+  view.createElement();
   equals(view.$('aside').length, 3, 'one aside element is created for each content item');
 });
 
@@ -70,7 +70,7 @@ test("a block passed to a collection helper defaults to the content property of 
     template: SC.Handlebars.compile('{{#collection "TemplateTests.CollectionTestView"}} <aside>{{content}}</aside> {{/collection}}')
   });
 
-  view.createLayer();
+  view.createElement();
 
   equals(view.$('li:has(aside:contains("foo")) + li:has(aside:contains("bar")) + li:has(aside:contains("baz"))').length, 1, 'one aside element is created for each content item');
 });
@@ -84,7 +84,7 @@ test("a block passed to a collection helper defaults to the view", function() {
     template: SC.Handlebars.compile('{{#collection "TemplateTests.CollectionTestView"}} <aside>{{content}}</aside> {{/collection}}')
   });
 
-  view.createLayer();
+  view.createElement();
   equals(view.$('li:has(aside:contains("foo")) + li:has(aside:contains("bar")) + li:has(aside:contains("baz"))').length, 1, 'precond - one aside element is created for each content item');
 
   SC.run(function() {
@@ -98,7 +98,7 @@ test("should include an id attribute if id is set in the options hash", function
     template: SC.Handlebars.compile('{{#collection "TemplateTests.CollectionTestView" id="baz"}}foo{{/collection}}')
   });
 
-  view.createLayer();
+  view.createElement();
   equals(view.$('ul#baz').length, 1, "adds an id attribute");
 });
 
@@ -110,7 +110,7 @@ test("should give its item views the class specified by itemClass", function() {
     template: SC.Handlebars.compile('{{#collection "TemplateTests.itemClassTestCollectionView" itemClass="baz"}}foo{{/collection}}')
   });
 
-  view.createLayer();
+  view.createElement();
   equals(view.$('ul li.baz').length, 3, "adds class attribute");
 });
 
@@ -122,7 +122,7 @@ test("should give its item views the classBinding specified by itemClassBinding"
     template: SC.Handlebars.compile('{{#collection "TemplateTests.itemClassBindingTestCollectionView" itemClassBinding="content.isBaz"}}foo{{/collection}}')
   });
 
-  view.createLayer();
+  view.createElement();
   equals(view.$('ul li.is-baz').length, 2, "adds class on initial rendering");
 
   SC.run(function() {
@@ -149,7 +149,7 @@ test("should work inside a bound {{#if}}", function() {
     shouldDisplay: true
   });
 
-  view.createLayer();
+  view.createElement();
   equals(view.$('ul li').length, 3, "renders collection when conditional is true");
 
   SC.run(function() { view.set('shouldDisplay', NO); });
@@ -171,7 +171,7 @@ test("should pass content as context when using {{#each}} helper", function() {
                   name: 'Leopard' } ]
   });
 
-  SC.run(function() { view.createLayer(); });
+  SC.run(function() { view.createElement(); });
 
   equals(view.$().text(), "Mac OS X 10.7: Lion Mac OS X 10.6: Snow Leopard Mac OS X 10.5: Leopard ", "prints each item in sequence");
 });
@@ -185,7 +185,7 @@ test("should re-render when the content object changes", function() {
     template: SC.Handlebars.compile('{{#collection TemplateTests.RerenderTest}}{{content}}{{/collection}}')
   });
 
-  view.createLayer();
+  view.createElement();
 
   SC.run(function() {
     view.childViews[0].set('content', ['bing', 'bat', 'bang']);

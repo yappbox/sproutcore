@@ -179,14 +179,14 @@ test("invokes layoutDidChange() on child view", function() {
 // VERIFY LAYER CHANGES ARE DEFERRED
 test("should not move layer immediately", function() {
 
-  parent.createLayer();
-  child.createLayer();
+  parent.createElement();
+  child.createElement();
   
-  ok(parent.get('layer'), 'precond - parent has layer');
-  ok(child.get('layer'), 'precond - child has layer');
+  ok(parent.get('element'), 'precond - parent has layer');
+  ok(child.get('element'), 'precond - child has layer');
   
   parent.insertBefore(child, null);
-  ok(child.get('layer').parentNode !== parent.get('layer'), 'did not move layer');
+  ok(child.get('element').parentNode !== parent.get('element'), 'did not move layer');
   
 });
 

@@ -59,7 +59,7 @@ sc_require('ext/handlebars');
       // Observe the given property on the context and
       // tells the SC._BindableSpan to re-render.
       this.addObserver(property, this, function observer() {
-        if (bindView.get('layer')) {
+        if (bindView.get('element')) {
           bindView.rerender();
         } else {
           // If no layer can be found, we can assume somewhere

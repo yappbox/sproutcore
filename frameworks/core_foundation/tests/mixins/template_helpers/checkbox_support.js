@@ -13,14 +13,11 @@
         template: SC.Handlebars.compile('<input type="checkbox">')
       });
 
-      pane = SC.MainPane.create({
-        childViews: [checkboxView]
-      });
-      pane.append();
+      checkboxView.append();
     },
 
     teardown: function() {
-      pane.remove();
+      checkboxView.remove();
     }
   });
 

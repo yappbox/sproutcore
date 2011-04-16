@@ -186,8 +186,8 @@
     });
 
     // parent MUST have a layer.
-    parent.createLayer();
-    var layer = parent.get('layer');
+    parent.createElement();
+    var layer = parent.get('element');
     document.body.appendChild(layer);
 
     var layout = { top: 0, left: 0, width: 'auto', height: 'auto' };
@@ -264,8 +264,8 @@
     });
 
     // parent MUST have a layer.
-    parent.createLayer();
-    var layer = parent.get('layer');
+    parent.createElement();
+    var layer = parent.get('element');
     document.body.appendChild(layer);
 
     var layout = { top: 0.1, left: 0.1, width: 'auto', height: 'auto' };
@@ -293,8 +293,8 @@
   module('CSS TRANSFORM LAYOUT VARIATIONS', {
     setup: function(){
       commonSetup.setup();
-      child.createLayer();
-      document.body.appendChild(child.get('layer'));
+      child.createElement();
+      document.body.appendChild(child.get('element'));
     },
 
     teardown: function(){
@@ -304,7 +304,7 @@
   });
 
   function transformFor(view){
-    return view.get('layer').style[SC.platform.domCSSPrefix+'Transform'];
+    return view.get('element').style[SC.platform.domCSSPrefix+'Transform'];
   }
 
   test("layout {rotateX}", function() {
@@ -403,8 +403,8 @@
       });
 
       // parent MUST have a layer.
-      parent.createLayer();
-      var layer = parent.get('layer');
+      parent.createElement();
+      var layer = parent.get('element');
       document.body.appendChild(layer);
 
       var layout = { top: 0, left: 0, width: 'auto', height: 'auto' };
@@ -629,8 +629,8 @@
     });
 
     // parent MUST have a layer.
-    parent.createLayer();
-    var layer = parent.get('layer');
+    parent.createElement();
+    var layer = parent.get('element');
     document.body.appendChild(layer);
 
     var layout = { top: 0, left: 0, width: 'auto', height: 'auto', border: 2 };

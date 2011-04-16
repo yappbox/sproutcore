@@ -17,9 +17,9 @@ module("SC.View#updateLayerLocation", {
 		});
 		child = parent.childViews[0];
 	
-		parent.createLayer();
-		parentLayer = parent.get('layer');
-		childLayer = child.get('layer');
+		parent.createElement();
+		parentLayer = parent.get('element');
+		childLayer = child.get('element');
 	},
 	
 	teardown: function() {
@@ -55,12 +55,12 @@ test("CASE 1: remove child from parent - remove child layer from parent layer", 
 test("CASE 2: add child to new parent view with no layer if its own, destroy the layer...", function() {
 
 	var newParent = SC.View.create();
-	ok(!newParent.get('layer'), 'precond - new parent has no layer');
+	ok(!newParent.get('element'), 'precond - new parent has no layer');
 	newParent.appendChild(child);
 	
 	child.updateLayerLocation() ;
 	ok(!parentHasChild(parentLayer, childLayer), 'child layer was removed from parent layer');
-	ok(!child.get('layer'), 'child no longer has layer either');
+	ok(!child.get('element'), 'child no longer has layer either');
 });
 
 test("CASE 3: add child with no layer or parent with no layer.  nothing to do.  this test ensures no errors are thrown", function() {
@@ -68,23 +68,23 @@ test("CASE 3: add child with no layer or parent with no layer.  nothing to do.  
 	// create a few new views w/ no layers...
 	var newParent = SC.View.create();
 	var newChild = SC.View.create();
-	ok(!newParent.get('layer'), 'precond - new parent has no layer');
-	ok(!newChild.get('layer'), 'precond - new child has no layer');
+	ok(!newParent.get('element'), 'precond - new parent has no layer');
+	ok(!newChild.get('element'), 'precond - new child has no layer');
 	newParent.appendChild(newChild);
 	
-	ok(!newParent.get('layer'), 'new parent still has no layer');
-	ok(!newChild.get('layer'), 'new child still has no layer');
+	ok(!newParent.get('element'), 'new parent still has no layer');
+	ok(!newChild.get('element'), 'new child still has no layer');
 });
 
 test("CASE 4: add child with no layer to parent with layer.  create layer for child", function() {
 
 	var newChild = SC.View.create();
-	ok(!newChild.get('layer'), 'precond - new child has no layer');
+	ok(!newChild.get('element'), 'precond - new child has no layer');
 
 	parent.appendChild(newChild);
 	newChild.updateLayerLocation();
 	
-	var layer = newChild.get('layer');
+	var layer = newChild.get('element');
 	ok(layer, 'newChild now has layer');
 	equals(layer.parentNode, parentLayer, 'newChild layer belongs to parent layer');	
 });
@@ -92,7 +92,7 @@ test("CASE 4: add child with no layer to parent with layer.  create layer for ch
 test("CASE 5: add child with layer to parent with layer.  move layer from previous location to new parent", function() {
 
 	var newParent = SC.View.create();
-	var layer = newParent.createLayer().get('layer');
+	var layer = newParent.createElement().get('element');
 	ok(layer, 'precond - newParent has layer');
 	
 	newParent.appendChild(child);
@@ -106,11 +106,11 @@ test("CASE 5a: insert child before a sibling w/ layer - should insert child laye
 
 	var newParent = SC.View.create({
 	  childViews: [SC.View]
-	}).createLayer();
-	var newParentLayer = newParent.get('layer');
+	}).createElement();
+	var newParentLayer = newParent.get('element');
 
 	var sibling = newParent.childViews[0];
-	var siblingLayer = sibling.get('layer');
+	var siblingLayer = sibling.get('element');
 
 	ok(newParentLayer, 'precond - newParent has layer');
 	ok(siblingLayer, 'precond - sibling has layer');
@@ -126,13 +126,13 @@ test("CASE 5a: insert child before a sibling w/ layer - should insert child laye
 
 test("CASE 5b: insert child w/ layer before a sibling w/ NO layer - should create and insert sibling & child's layers", function() {
 
-	var newParent = SC.View.create().createLayer();
-	var newParentLayer = newParent.get('layer');
+	var newParent = SC.View.create().createElement();
+	var newParentLayer = newParent.get('element');
 
 	var sibling = SC.View.create();
 
 	ok(newParentLayer, 'precond - newParent has layer');
-	ok(!sibling.get('layer'), 'precond - sibling should have NO layer');
+	ok(!sibling.get('element'), 'precond - sibling should have NO layer');
 	
 	// add layer-less sibling to parent before child..
 	newParent.appendChild(sibling);
@@ -142,7 +142,7 @@ test("CASE 5b: insert child w/ layer before a sibling w/ NO layer - should creat
 	
 	child.updateLayerLocation();
 	
-	var siblingLayer = sibling.get('layer');
+	var siblingLayer = sibling.get('element');
 	ok(siblingLayer, 'sibling should have layer now');
 	ok(parentHasChild(newParentLayer, siblingLayer), 'sibling layer should belong to newParent layer');
 	
@@ -151,22 +151,22 @@ test("CASE 5b: insert child w/ layer before a sibling w/ NO layer - should creat
 });
 
 test("should insert a CoreView without layer before a sibling with layer", function() {
-  var newParent = SC.View.create().createLayer();
-  var newParentLayer = newParent.get('layer');
+  var newParent = SC.View.create().createElement();
+  var newParentLayer = newParent.get('element');
 
-  var sibling = SC.View.create().createLayer();
-  var siblingLayer = sibling.get('layer');
+  var sibling = SC.View.create().createElement();
+  var siblingLayer = sibling.get('element');
 
   ok(newParentLayer, 'precond - newParent has a layer');
-  ok(sibling.get('layer'), 'precond - sibling has a layer');
+  ok(sibling.get('element'), 'precond - sibling has a layer');
 
   child = SC.CoreView.create();
 
   newParent.appendChild(sibling);
   newParent.insertBefore(child, sibling);
 
-  ok(parentHasChild(newParentLayer, child.get('layer')), "child layer should belong to parent layer");
-  equals(child.get('layer').nextSibling, siblingLayer, "child layer should be inserted before sibling layer");
+  ok(parentHasChild(newParentLayer, child.get('element')), "child layer should belong to parent layer");
+  equals(child.get('element').nextSibling, siblingLayer, "child layer should be inserted before sibling layer");
 });
 
 // .......................................................

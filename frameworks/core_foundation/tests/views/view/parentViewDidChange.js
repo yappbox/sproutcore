@@ -15,8 +15,8 @@ module("SC.View#parentViewDidChange", {
 
 test("invokes updateLayerLocationIfNeeded at end of runloop if has layer", function() {
 	
-	view.createLayer();
-	ok(view.get('layer'), 'precond - has layer');
+	view.createElement();
+	ok(view.get('element'), 'precond - has layer');
 	
 	var runCount = 0;
 	view.updateLayerLocationIfNeeded = function() { runCount++; };
@@ -31,8 +31,8 @@ test("invokes updateLayerLocationIfNeeded at end of runloop if has layer", funct
 
 test("invokes updateLayerLocationIfNeeded only once no matter how many times it is run", function() {
 	
-	view.createLayer();
-	ok(view.get('layer'), 'precond - has layer');
+	view.createElement();
+	ok(view.get('element'), 'precond - has layer');
 	
 	var runCount = 0;
 	view.updateLayerLocationIfNeeded = function() { runCount++; };

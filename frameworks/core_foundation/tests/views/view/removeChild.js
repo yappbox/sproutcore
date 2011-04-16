@@ -120,9 +120,9 @@ test("invokes parentViewDidChange() on child view.  this is used by the view int
 // VERIFY LAYER CHANGES ARE DEFERRED
 test("should not move layer immediately", function() {
 
-  parent.createLayer();
+  parent.createElement();
 
-	var parentLayer = parent.get('layer'), childLayer = child.get('layer');  
+	var parentLayer = parent.get('element'), childLayer = child.get('element');  
   ok(parentLayer, 'precond - parent has layer');
   ok(childLayer, 'precond - child has layer');
   equals(childLayer.parentNode, parentLayer, 'child layer belong to parent');

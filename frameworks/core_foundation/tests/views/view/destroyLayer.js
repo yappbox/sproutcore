@@ -13,7 +13,7 @@ test("it if has no layer, does nothing", function() {
   var view = SC.View.create({ 
     willDestroyLayer: function() { callCount++; }
   });
-  ok(!view.get('layer'), 'precond - does NOT have layer');
+  ok(!view.get('element'), 'precond - does NOT have layer');
   
   view.destroyLayer();
   equals(callCount, 0, 'did not invoke callback');
@@ -31,12 +31,12 @@ test("if it has a layer, calls willDestroyLayer on receiver and child views then
       })]
     })]
   });
-  view.createLayer();
-  ok(view.get('layer'), 'precond - view has layer');
+  view.createElement();
+  ok(view.get('element'), 'precond - view has layer');
   
   view.destroyLayer();
   equals(callCount, 2, 'invoked destroy layer');  
-  ok(!view.get('layer'), 'view no longer has layer');
+  ok(!view.get('element'), 'view no longer has layer');
 });
 
 test("if it has a layer, calls willDestroyLayerMixin on receiver and child views if defined (comes from mixins)", function() {
@@ -56,19 +56,19 @@ test("if it has a layer, calls willDestroyLayerMixin on receiver and child views
       childViews: [SC.View.extend(mixinA)]
     })]
   });
-  view.createLayer();
+  view.createElement();
   view.destroyLayer();
   equals(callCount, 5, 'invoked willDestroyLayerMixin on all mixins');  
 });
 
 test("returns receiver", function() {
-  var view = SC.View.create().createLayer();
+  var view = SC.View.create().createElement();
   equals(view.destroyLayer(), view, 'returns receiver');
 });
 
 test("removes layer from parentNode if in DOM", function() {
   var view = SC.View.create();
-  var layer = view.createLayer().get('layer');
+  var layer = view.createElement().get('element');
   
   ok(layer, 'precond - has layer');
   document.body.appendChild(layer); // add to document body

@@ -7,91 +7,21 @@
 
 sc_require('system/browser');
 sc_require('system/event');
-sc_require('system/cursor');
 sc_require('system/responder') ;
 sc_require('system/theme');
 
 sc_require('system/string') ;
-sc_require('views/view/base') ;
 
+SC.View = SC.Responder.extend(
+/** @scope SC.CoreView.prototype */ {
 
-/**
-  Default property to disable or enable by default the contextMenu
-*/
-SC.CONTEXT_MENU_ENABLED = YES;
-
-/**
-  Default property to disable or enable if the focus can jump to the address
-  bar or not.
-*/
-SC.TABBING_ONLY_INSIDE_DOCUMENT = YES;
-
-/**
-  Tells the property (when fetched with themed()) to get its value from the renderer (if any).
-*/
-SC.FROM_THEME = "__FROM_THEME__"; // doesn't really matter what it is, so long as it is unique. Readability is a plus.
-
-/** @private - custom array used for child views */
-SC.EMPTY_CHILD_VIEWS_ARRAY = [];
-SC.EMPTY_CHILD_VIEWS_ARRAY.needsClone = YES;
-
-/**
-  @class
-
-*/
-SC.CoreView.reopen(
-/** @scope SC.View.prototype */ {
-
-  concatenatedProperties: ['outlets', 'displayProperties', 'classNames', 'renderMixin', 'didCreateLayerMixin', 'willDestroyLayerMixin'],
-
-  /**
-    The current pane.
-    @property {SC.Pane}
-  */
-  pane: function() {
-    var view = this ;
-    while (view && !view.isPane) { view = view.get('parentView') ; }
-    return view ;
-  }.property('parentView').cacheable(),
-
-  /**
-    The page this view was instantiated from.  This is set by the page object
-    during instantiation.
-
-    @property {SC.Page}
-  */
-  page: null,
+  concatenatedProperties: ['classNames'],
 
   /**
     If the view is currently inserted into the DOM of a parent view, this
     property will point to the parent of the view.
   */
   parentView: null,
-
-  /**
-    The isVisible property determines if the view is shown in the view
-    hierarchy it is a part of. A view can have isVisible == YES and still have
-    isVisibleInWindow == NO. This occurs, for instance, when a parent view has
-    isVisible == NO. Default is YES.
-
-    The isVisible property is considered part of the layout and so changing it
-    will trigger a layout update.
-
-    @property {Boolean}
-  */
-  isVisible: YES,
-  isVisibleBindingDefault: SC.Binding.bool(),
-
-  /**
-    Whether the view should be displayed. This is always YES,
-    unless the visibility module is added to SC.View.
-
-    If the visibility module is added, this property will be used to
-    optimize certain behaviors on the view. For example, updates to the
-    view layer will not be performed until the view becomes visible
-    in the window.
-  */
-  isVisibleInWindow: YES,
 
   // ..........................................................
   // CHILD VIEW SUPPORT
@@ -105,66 +35,49 @@ SC.CoreView.reopen(
 
     @property {Array}
   */
-  childViews: SC.EMPTY_CHILD_VIEWS_ARRAY,
+  childViews: [],
 
   // ..........................................................
-  // LAYER SUPPORT
+  // ELEMENT SUPPORT
   //
 
   /**
-    Returns the current layer for the view.  The layer for a view is only
-    generated when the view first becomes visible in the window and even
-    then it will not be computed until you request this layer property.
+    Returns the current DOM element for the view.
 
-    If the layer is not actually set on the view itself, then the layer will
-    be found by calling this.findLayerInParentLayer().
-
-    You can also set the layer by calling set on this property.
-
-    @property {DOMElement} the layer
+    @property {DOMElement} the element
   */
-  layer: function(key, value) {
-    if (value !== undefined) {
-      this._view_layer = value ;
+  element: function(key, value) {
+    // If the value of element is being set, just return it. SproutCore
+    // will cache it for further `get` calls.
+    if (value !== undefined) { return value; }
 
-    // no layer...attempt to discover it...
-    } else {
-      value = this._view_layer;
-      if (!value) {
-        var parent = this.get('parentView');
-        if (parent) { parent = parent.get('layer'); }
-        if (parent) { this._view_layer = value = this.findLayerInParentLayer(parent); }
-      }
-    }
-    return value ;
-  }.property('isVisibleInWindow').cacheable(),
+    var parent = this.get('parentView');
+    if (parent) { parent = parent.get('element'); }
+    if (parent) { return this.findElementInParentElement(parent); }
+  }.property('parentView').cacheable(),
 
   /**
-    Get a CoreQuery object for this view's layer, or pass in a selector string
-    to get a CoreQuery object for a DOM node nested within this layer.
+    Returns a jQuery object for this view's element. If you pass in a selector
+    string, this method will return a jQuery object, using the current element
+    as its context.
 
-    @param {String} sel a CoreQuery-compatible selector string
+    For example, calling `view.$('li')` will return a jQuery object containing
+    all of the `li` elements inside the DOM element of this view.
+
+    @param {String} [selector] a jQuery-compatible selector string
     @returns {SC.CoreQuery} the CoreQuery object for the DOM node
   */
   $: function(sel) {
-    var layer = this.get('layer') ;
+    var elem = this.get('element') ;
 
-    if(!layer) { return SC.$(); }
-    else if(sel === undefined) { return SC.$(layer); }
-    else { return SC.$(sel, layer); }
+    if (!elem) {
+      return SC.$();
+    } else if (sel === undefined) {
+      return SC.$(elem);
+    } else {
+      return SC.$(sel, elem);
+    }
   },
-
-  /**
-    Returns the DOM element that should be used to hold child views when they
-    are added/remove via DOM manipulation.  The default implementation simply
-    returns the layer itself.  You can override this to return a DOM element
-    within the layer.
-
-    @property {DOMElement} the container layer
-  */
-  containerLayer: function() {
-    return this.get('layer') ;
-  }.property('layer').cacheable(),
 
   /**
     The ID to use when trying to locate the layer in the DOM.  If you do not
@@ -174,9 +87,8 @@ SC.CoreView.reopen(
     @property {String}
     @readOnly
   */
-  layerId: function(key, value) {
-    if (value) { this._layerId = value; }
-    if (this._layerId) { return this._layerId; }
+  elementId: function(key, value) {
+    if (value) { return value; }
     return SC.guidFor(this) ;
   }.property().cacheable(),
 
@@ -190,175 +102,10 @@ SC.CoreView.reopen(
     @param {DOMElement} parentLayer the parent's DOM layer
     @returns {DOMElement} the discovered layer
   */
-  findLayerInParentLayer: function(parentLayer) {
-    var id = "#" + this.get('layerId');
-    return jQuery(id)[0] || jQuery(id, parentLayer)[0] ;
+  findElementInParentElement: function(parentElem) {
+    var id = "#" + this.get('elementId');
+    return jQuery(id)[0] || jQuery(id, parentElem)[0] ;
   },
-
-  /**
-    Returns YES if the receiver is a subview of a given view or if it's
-    identical to that view. Otherwise, it returns NO.
-
-    @property {SC.View} view
-  */
-  isDescendantOf: function(view) {
-    var parentView = this.get('parentView');
-
-    if(this === view) { return YES; }
-    else if(parentView) { return parentView.isDescendantOf(view); }
-    else { return NO; }
-  },
-
-  /**
-    This method is invoked whenever a display property changes.  It will set
-    the layerNeedsUpdate method to YES.  If you need to perform additional
-    setup whenever the display changes, you can override this method as well.
-
-    @returns {SC.View} receiver
-  */
-  displayDidChange: function() {
-    this.set('layerNeedsUpdate', YES) ;
-    return this;
-  },
-
-  /**
-    Marks the view as needing a display update if the isVisible property changes.
-
-    Note that this behavior is identical to a display property. It is broken out
-    into its own observer so that it can be overridden with additional
-    functionality if the visibility module is applied to SC.View.
-  */
-  _sc_isVisibleDidChange: function() {
-    this.displayDidChange();
-  }.observes('isVisible'),
-
-  /**
-    Setting this property to YES will cause the updateLayerIfNeeded method to
-    be invoked at the end of the runloop.  You can also force a view to update
-    sooner by calling updateLayerIfNeeded() directly.  The method will update
-    the layer only if this property is YES.
-
-    @property {Boolean}
-    @test in updateLayer
-  */
-  layerNeedsUpdate: NO,
-
-  /** @private
-    Schedules the updateLayerIfNeeded method to run at the end of the runloop
-    if layerNeedsUpdate is set to YES.
-  */
-  _view_layerNeedsUpdateDidChange: function() {
-    if (this.get('layerNeedsUpdate')) {
-      this.invokeOnce(this.updateLayerIfNeeded) ;
-    }
-  }.observes('layerNeedsUpdate'),
-
-  /**
-    Updates the layer only if the view is visible onscreen and if
-    layerNeedsUpdate is set to YES.  Normally you will not invoke this method
-    directly.  Instead you set the layerNeedsUpdate property to YES and this
-    method will be called once at the end of the runloop.
-
-    If you need to update view's layer sooner than the end of the runloop, you
-    can call this method directly.  If your view is not visible in the window
-    but you want it to update anyway, then call this method, passing YES for
-    the 'skipIsVisibleInWindowCheck' parameter.
-
-    You should not override this method.  Instead override updateLayer() or
-    render().
-
-    @returns {SC.View} receiver
-    @test in updateLayer
-  */
-  updateLayerIfNeeded: function(skipIsVisibleInWindowCheck) {
-    var needsUpdate  = this.get('layerNeedsUpdate'),
-        shouldUpdate = needsUpdate  &&  (skipIsVisibleInWindowCheck || this.get('isVisibleInWindow'));
-    if (shouldUpdate) {
-      // only update a layer if it already exists
-      if (this.get('layer')) {
-        this.beginPropertyChanges() ;
-        this.set('layerNeedsUpdate', NO) ;
-        this.updateLayer() ;
-        this.endPropertyChanges() ;
-      }
-    }
-
-    return this ;
-  },
-
-  /**
-    This is the core method invoked to update a view layer whenever it has
-    changed.  This method simply creates a render context focused on the
-    layer element and then calls your render() method.
-
-    You will not usually call or override this method directly.  Instead you
-    should set the layerNeedsUpdate property to YES to cause this method to
-    run at the end of the run loop, or you can call updateLayerIfNeeded()
-    to force the layer to update immediately.
-
-    Instead of overriding this method, consider overidding the render() method
-    instead, which is called both when creating and updating a layer.  If you
-    do not want your render() method called when updating a layer, then you
-    should override this method instead.
-
-    @param optionalContext provided only for backwards-compatibility.
-
-    @returns {SC.View} receiver
-  */
-  updateLayer: function(optionalContext) {
-    var mixins, idx, len, hasLegacyRenderMethod;
-
-    var context = optionalContext || this.renderContext(this.get('layer')) ;
-    this._renderLayerSettings(context, NO);
-
-    // If the render method takes two parameters, we assume that it is a
-    // legacy implementation that takes context and firstTime. If it has only
-    // one parameter, we assume it is the render delegates style that requires
-    // only context. Note that, for backwards compatibility, the default
-    // SC.View implementation of render uses the old style.
-    hasLegacyRenderMethod = !this.update;
-    // Call render with firstTime set to NO to indicate an update, rather than
-    // full re-render, should be performed.
-    if (hasLegacyRenderMethod) {
-      this.render(context, NO);
-    }
-    else {
-      this.update(context.$());
-    }
-    if (mixins = this.renderMixin) {
-      len = mixins.length;
-      for(idx=0; idx<len; ++idx) { mixins[idx].call(this, context, NO) ; }
-    }
-
-    context.update() ;
-    if (context._innerHTMLReplaced) {
-      var pane = this.get('pane');
-      if(pane && pane.get('isPaneAttached')) {
-        this._notifyDidAppendToDocument();
-      }
-    }
-
-    // If this view uses static layout, then notify that the frame (likely)
-    // changed.
-    if (this.useStaticLayout) { this.viewDidResize(); }
-
-    if (this.didUpdateLayer) { this.didUpdateLayer(); } // call to update DOM
-    if(this.designer && this.designer.viewDidUpdateLayer) {
-      this.designer.viewDidUpdateLayer(); //let the designer know
-    }
-    return this ;
-  },
-
-  parentViewDidResize: function() {
-    if (!this.get('hasLayout')) { this.notifyPropertyChange('frame'); }
-    this.viewDidResize();
-  },
-
-  /**
-    Override this in a child class to define behavior that should be invoked
-    when a parent's view was resized.
-   */
-  viewDidResize: function() {},
 
   /**
     Creates a new renderContext with the passed tagName or element.  You
@@ -372,70 +119,45 @@ SC.CoreView.reopen(
   },
 
   /**
-    Creates the layer by creating a renderContext and invoking the view's
-    render() method.  This will only create the layer if the layer does not
-    already exist.
+    Creates a DOM representation of the view and all of its
+    child views by recursively calling the `render()` method.
 
-    When you create a layer, it is expected that your render() method will
-    also render the HTML for all child views as well.  This method will
-    notify the view along with any of its childViews that its layer has been
-    created.
+    After the element has been created, `didCreateElement` will
+    be called on this view and all of its child views.
 
     @returns {SC.View} receiver
   */
-  createLayer: function() {
-    if (this.get('layer')) { return this ; } // nothing to do
+  createElement: function() {
+    if (this.get('element')) { return this ; } // nothing to do
 
     var context = this.renderContext(this.get('tagName')) ;
 
     // now prepare the content like normal.
     this.renderToContext(context) ;
-    this.set('layer', context.element()) ;
+    this.set('element', context.element());
 
     // now notify the view and its child views..
-    this._notifyDidCreateLayer() ;
+    this._notifyDidCreateElement() ;
 
     return this ;
   },
+
+  didCreateElement: function() {},
 
   /** @private -
     Invokes the receivers didCreateLayer() method if it exists and then
     invokes the same on all child views.
   */
-  _notifyDidCreateLayer: function() {
-    this.notifyPropertyChange('layer');
+  _notifyDidCreateElement: function() {
+    this.notifyPropertyChange('element');
 
-    if (this.didCreateLayer) { this.didCreateLayer() ; }
+    this.didCreateElement() ;
 
-    // and notify others
-    var mixins = this.didCreateLayerMixin, len, idx,
-        childViews = this.get('childViews'),
-        childView;
-    if (mixins) {
-      len = mixins.length ;
-      for (idx=0; idx<len; ++idx) { mixins[idx].call(this) ; }
-    }
+    for (var i=0, l=childView.length; i<l; ++i) {
+      childView = childViews[i];
 
-    len = childViews.length ;
-    for (idx=0; idx<len; ++idx) {
-      childView = childViews[idx];
       if (!childView) { continue; }
-
-      // A parent view creating a layer might result in the creation of a
-      // child view's DOM node being created via a render context without
-      // createLayer() being invoked on the child.  In such cases, if anyone
-      // had requested 'layer' and it was cached as null, we need to
-      // invalidate it.
-      childView.notifyPropertyChange('layer');
-
-      // A strange case, that a childView's frame won't be correct before
-      // we have a layer, if the childView doesn't have a fixed layout
-      // and we are using static layout
-      if (this.get('useStaticLayout')) {
-        if (!childView.get('isFixedLayout')) { childView.viewDidResize(); }
-      }
-
-      childView._notifyDidCreateLayer() ;
+      childView._notifyDidCreateElement() ;
     }
   },
 
@@ -457,126 +179,54 @@ SC.CoreView.reopen(
 
     @returns {SC.View} receiver
   */
-  destroyLayer: function() {
-    var layer = this.get('layer') ;
-    if (layer) {
+  destroyElement: function() {
+    var elem = this.get('element') ;
+    if (elem) {
+      // Notify the view and its child views that the element is about to be
+      // destroyed.
+      this._notifyWillDestroyElement() ;
 
-      // Now notify the view and its child views.  It will also set the
-      // layer property to null.
-      this._notifyWillDestroyLayer() ;
+      // Remove this DOM element from its parent.
+      SC.$(elem).remove();
 
-      // do final cleanup
-      if (layer.parentNode) { layer.parentNode.removeChild(layer) ; }
-      layer = null ;
+      this.notifyPropertyChange('element');
     }
     return this ;
   },
 
-  /**
-    Destroys and recreates the current layer.  This can be more efficient than
-    modifying individual child views.
+  /** @private
+    If this view's element changes, we need to invalidate the caches of our
+    child views so that we do not retain references to DOM elements that are no
+    longer needed.
 
-    @returns {SC.View} receiver
+    @observes element
   */
-  replaceLayer: function() {
-    this.destroyLayer();
-    //this.set('layerLocationNeedsUpdate', YES) ;
-    this.invokeOnce(this.updateLayerLocation) ;
-  },
+  _sccv_elementDidChange: function() {
+    var idx, len, childViews = this.get('childViews');
 
-  /**
-    If the parent view has changed, we need to insert this
-    view's layer into the layer of the new parent view.
-  */
-  parentViewDidChange: function() {
-    this.parentViewDidResize();
-    this.updateLayerLocation();
-  },
-
-  /**
-    This method is called when a view changes its location in the view
-    hierarchy.  This method will update the underlying DOM-location of the
-    layer so that it reflects the new location.
-
-    @returns {SC.View} receiver
-  */
-  updateLayerLocation: function() {
-    // collect some useful value
-    // if there is no node for some reason, just exit
-    var node = this.get('layer'),
-        parentView = this.get('parentView'),
-        parentNode = parentView ? parentView.get('containerLayer') : null ;
-
-    // remove node from current parentNode if the node does not match the new
-    // parent node.
-    if (node && node.parentNode && node.parentNode !== parentNode) {
-      node.parentNode.removeChild(node);
+    len = childViews.get('length');
+    for (idx = 0; idx < len; idx++) {
+      childViews[idx].notifyPropertyChange('element');
     }
+  }.observes('element'),
 
-    // CASE 1: no new parentView.  just remove from parent (above).
-    if (!parentView) {
-      if (node && node.parentNode) { node.parentNode.removeChild(node); }
-
-    // CASE 2: parentView has no layer, view has layer.  destroy layer
-    // CASE 3: parentView has no layer, view has no layer, nothing to do
-    } else if (!parentNode) {
-      if (node) {
-        if (node.parentNode) { node.parentNode.removeChild(node); }
-        this.destroyLayer();
-      }
-
-    // CASE 4: parentView has layer, view has no layer.  create layer & add
-    // CASE 5: parentView has layer, view has layer.  move layer
-    } else {
-      if (!node) {
-        this.createLayer() ;
-        node = this.get('layer') ;
-        if (!node) { return; } // can't do anything without a node.
-      }
-
-      var siblings = parentView.get('childViews'),
-          nextView = siblings.objectAt(siblings.indexOf(this)+1),
-          nextNode = (nextView) ? nextView.get('layer') : null ;
-
-      // before we add to parent node, make sure that the nextNode exists...
-      if (nextView && (!nextNode || nextNode.parentNode!==parentNode)) {
-        nextView.updateLayerLocationIfNeeded() ;
-        nextNode = nextView.get('layer') ;
-      }
-
-      // add to parentNode if needed.
-      if ((node.parentNode!==parentNode) || (node.nextSibling!==nextNode)) {
-        parentNode.insertBefore(node, nextNode) ;
-      }
-    }
-
-    parentNode = parentView = node = nextNode = null ; // avoid memory leaks
-
-    this.set('layerLocationNeedsUpdate', NO) ;
-
-    return this ;
-  },
+  willDestroyElement: function() { },
 
   /** @private -
-    Invokes willDestroyLayer() on view and child views.  Then sets layer to
-    null for receiver.
+    Invokes the `willDestroyElement` callback on the view and child views.
   */
-  _notifyWillDestroyLayer: function() {
-    if (this.willDestroyLayer) { this.willDestroyLayer() ; }
-    var mixins = this.willDestroyLayerMixin, len, idx,
-        childViews = this.get('childViews') ;
-    if (mixins) {
-      len = mixins.length ;
-      for (idx=0; idx<len; ++idx) { mixins[idx].call(this) ; }
-    }
+  _notifyWillDestroyElement: function() {
+    this.willDestroyElement();
+
+    var len, idx, childViews = this.get('childViews') ;
 
     len = childViews.length ;
-    for (idx=0; idx<len; ++idx) { childViews[idx]._notifyWillDestroyLayer() ; }
-
-    this.set('layer', null) ;
+    for (idx=0; idx<len; ++idx) {
+      childViews[idx]._notifyWillDestroyElement() ;
+    }
   },
 
-
+  parentViewDidChange: function() { },
 
   /**
     @private
@@ -658,7 +308,7 @@ SC.CoreView.reopen(
   /**
   @private
 
-    Invoked by createLayer() and updateLayer() to actually render a context.
+    Invoked by createElement() and updateLayer() to actually render a context.
     This method calls the render() method on your view along with any
     renderMixin() methods supplied by mixins you might have added.
 
@@ -871,7 +521,7 @@ SC.CoreView.reopen(
 
     // Register the view for event handling. This hash is used by
     // SC.RootResponder to dispatch incoming events.
-    SC.View.views[this.get('layerId')] = this;
+    SC.CoreView.views[this.get('layerId')] = this;
 
     // setup child views.  be sure to clone the child views array first
     this.childViews = this.get('childViews').slice() ;
@@ -932,7 +582,7 @@ SC.CoreView.reopen(
         f;                                // The layer's coordinates in the document
 
     // need layer to be able to compute rect
-    if (layer = this.get('layer')) {
+    if (layer = this.get('element')) {
       f = SC.offset(layer); // x,y
       if (pv) { f = pv.convertFrameFromView(f, null); }
 
@@ -1073,7 +723,7 @@ SC.CoreView.reopen(
     }
 
     // next remove view from global hash
-    delete SC.View.views[this.get('layerId')] ;
+    delete SC.CoreView.views[this.get('layerId')] ;
     delete this._CQ ;
     delete this.page ;
 
@@ -1403,94 +1053,3 @@ SC.CoreView.mixin(/** @scope SC.View.prototype */ {
   views: {}
 
 }) ;
-
-// .......................................................
-// OUTLET BUILDER
-//
-
-/**
-  Generates a computed property that will look up the passed property path
-  the first time you try to get the value.  Use this whenever you want to
-  define an outlet that points to another view or object.  The root object
-  used for the path will be the receiver.
-*/
-SC.outlet = function(path, root) {
-  return function(key) {
-    return (this[key] = SC.objectForPropertyPath(path, (root !== undefined) ? root : this)) ;
-  }.property();
-};
-
-/** @private on unload clear cached divs. */
-SC.CoreView.unload = function() {
-  // delete view items this way to ensure the views are cleared.  The hash
-  // itself may be owned by multiple view subclasses.
-  var views = SC.View.views;
-  if (views) {
-   for(var key in views) {
-     if (!views.hasOwnProperty(key)) continue ;
-     delete views[key];
-   }
-  }
-} ;
-
-/**
-  @class
-
-  Base class for managing a view.  Views provide two functions:
-
-  1. They translate state and events into drawing instructions for the
-     web browser and
-
-  2. They act as first responders for incoming keyboard, mouse, and
-     touch events.
-
-  h2. View Initialization
-
-  When a view is setup, there are several methods you can override that
-  will be called at different times depending on how your view is created.
-  Here is a guide to which method you want to override and when:
-
-  - *init:* override this method for any general object setup (such as
-    observers, starting timers and animations, etc) that you need to happen
-    everytime the view is created, regardless of whether or not its layer
-    exists yet.
-
-  - *render:* override this method to generate or update your HTML to reflect
-    the current state of your view.  This method is called both when your view
-    is first created and later anytime it needs to be updated.
-
-  - *didCreateLayer:* the render() method is used to generate new HTML.
-    Override this method to perform any additional setup on the DOM you might
-    need to do after creating the view.  For example, if you need to listen
-    for events.
-
-  - *willDestroyLayer:* if you implement didCreateLayer() to setup event
-    listeners, you should implement this method as well to remove the same
-    just before the DOM for your view is destroyed.
-
-  - *updateLayer:* Normally, when a view needs to update its content, it will
-    re-render the view using the render() method.  If you would like to
-    override this behavior with your own custom updating code, you can
-    replace updateLayer() with your own implementation instead.
-
-  - *didAppendToDocument:* in theory all DOM setup could be done
-    in didCreateLayer() as you already have a DOM element instantiated.
-    However there is cases where the element has to be first appended to the
-    Document because there is either a bug on the browser or you are using
-    plugins which objects are not instantiated until you actually append the
-    element to the DOM. This will allow you to do things like registering
-    DOM events on flash or quicktime objects.
-
-  @extends SC.Responder
-  @extends SC.DelegateSupport
-  @since SproutCore 1.0
-
-*/
-SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
-  classNames: ['sc-view']
-});
-
-//unload views for IE, trying to collect memory.
-if(SC.browser.msie) SC.Event.add(window, 'unload', SC.View, SC.View.unload) ;
-
-

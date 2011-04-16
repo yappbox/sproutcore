@@ -85,7 +85,7 @@ test("should not create layer for created child views", function() {
     childViews: [SC.View]
   });
   ok(v.childViews[0].isObject, 'precondition - did create child view');
-  equals(v.childViews[0].get('layer'), null, 'childView does not have layer');
+  equals(v.childViews[0].get('element'), null, 'childView does not have layer');
 });
 
 // ..........................................................

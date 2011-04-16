@@ -5,7 +5,6 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('system/core_query');
 sc_require('system/ready');
 sc_require('system/root_responder');
 sc_require('system/platform');
@@ -96,6 +95,7 @@ SC.device = SC.Object.create({
     event handlers
   */
   setup: function() {
+    if (!SC.RootResponder) { return; }
     var responder = SC.RootResponder.responder;
     responder.listenFor(['online', 'offline'], window, this);
     

@@ -44,7 +44,7 @@ test("invokes createChildViews()", function() {
 
 test("does NOT create layer", function() {
   var v = SC.View.create();
-  equals(v.get('layer'), null, 'did not create layer');  
+  equals(v.get('element'), null, 'did not create layer');  
 });
 
 

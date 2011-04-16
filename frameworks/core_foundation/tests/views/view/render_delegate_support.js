@@ -21,7 +21,7 @@ test("Supports backwards-compatible render method", function() {
     }
   });
 
-  view.createLayer();
+  view.createElement();
   
   view.render = function(context, firstTime) {
     renderCallCount++;
@@ -52,7 +52,7 @@ test("Treats a view as its own render delegate", function() {
     }
   });
   
-  view.createLayer();
+  view.createElement();
   view.updateLayer();
   equals(renderCallCount, 1, "calls render once");
   equals(updateCallCount, 1, "calls update once");
@@ -83,7 +83,7 @@ test("Passes data source as first parameter if render delegate is not the view",
     renderDelegate: renderDelegate
   });
 
-  view.createLayer();
+  view.createElement();
   view.updateLayer();
   equals(renderCallCount, 1, "calls render once");
   equals(updateCallCount, 1, "calls update once");
@@ -109,7 +109,7 @@ test("Extending view with render delegate by implementing old render method", fu
     }
   });
   
-  childView.createLayer();
+  childView.createElement();
   childView.updateLayer();
   
   equals(renderCalls, 1, "calls render on render delegate once");
@@ -154,7 +154,7 @@ test("Views that do not override render should render their child views", functi
   
   parentView = parentView.create();
   
-  parentView.createLayer();
+  parentView.createElement();
   parentView.updateLayer();
   
   equals(newStyleCount, 1, "calls render on new style view once");

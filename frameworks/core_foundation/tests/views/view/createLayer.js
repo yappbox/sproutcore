@@ -7,13 +7,13 @@
 /*global module test equals context ok same Q$ */
 
 // ..........................................................
-// createLayer()
+// createElement()
 // 
 module("SC.View#createLayer");
 
 test("returns the receiver", function() {
   var v= SC.View.create();
-  equals(v.createLayer(), v, 'returns receiver');
+  equals(v.createElement(), v, 'returns receiver');
 });
 
 test("calls renderToContext() and sets layer to resulting element", function() {
@@ -25,10 +25,10 @@ test("calls renderToContext() and sets layer to resulting element", function() {
     }
   });
   
-  equals(v.get('layer'), null, 'precondition - has no layer');
-  v.createLayer();
+  equals(v.get('element'), null, 'precondition - has no layer');
+  v.createElement();
   
-  var elem = v.get('layer');
+  var elem = v.get('element');
   ok(!!elem, 'has element now');
   equals(elem.innerHTML, 'foo', 'has innerHTML from context');
   equals(elem.tagName.toString().toLowerCase(), 'span', 'has tagName from view');
@@ -55,9 +55,9 @@ test("invokes didCreateLayer() on receiver and all child views", function() {
   ok(v.didCreateLayer, 'precondition - has root');
   ok(v.childViews[0].didCreateLayer, 'precondition - has firstChild');
   ok(v.childViews[0].childViews[0].didCreateLayer, 'precondition - has nested child');
-  ok(!v.get('layer'), 'has no layer');
+  ok(!v.get('element'), 'has no layer');
 
-  v.createLayer();
+  v.createElement();
   equals(callCount, 3, 'did invoke all methods');
   equals(mixinCount, 2, 'did invoke all mixin methods');
 });
@@ -67,15 +67,15 @@ test("generated layer include HTML from child views as well", function() {
     childViews: [ SC.View.extend({ layerId: "foo" })]
   });
   
-  v.createLayer();
-  ok(Q$('#foo', v.get('layer')).get(0), 'has element with child layerId');
+  v.createElement();
+  ok(Q$('#foo', v.get('element')).get(0), 'has element with child layerId');
 });
 
 test("does NOT assign layer to child views immediately", function() {
   var v = SC.View.create({
     childViews: [ SC.View.extend({ layerId: "foo" })]
   });
-  v.createLayer();
+  v.createElement();
   ok(!v.childViews[0]._view_layer, 'has no layer yet');
 });
 

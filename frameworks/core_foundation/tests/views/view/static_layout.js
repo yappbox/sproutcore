@@ -12,7 +12,7 @@ test("Static layout", function() {
     useStaticLayout: YES
   });
 
-  view.createLayer();
+  view.createElement();
 
   ok(view.$().is('.sc-static-layout'), "views with useStaticLayout get the sc-static-layout class");
 });
@@ -22,7 +22,7 @@ test("Background color", function() {
     backgroundColor: "red"
   });
 
-  view.createLayer();
+  view.createElement();
 
   ok(view.$().css('background-color') == "red", "backgroundColor sets the CSS background-color class");
 });

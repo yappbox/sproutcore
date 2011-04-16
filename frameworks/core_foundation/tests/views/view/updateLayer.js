@@ -24,7 +24,7 @@ test("invokes renderLayerSettings() and then updates layer element", function() 
       this.$().addClass('did-update-' + times);
     }
   });
-  view.createLayer();
+  view.createElement();
   view.updateLayer();
   ok(view.$().attr('class').indexOf('did-update-2')>=0, 'has class name added by prepareContext()');
 });
@@ -43,7 +43,7 @@ module("SC.View#updateLayerIfNeeded", {
     });
     callCount = 0 ;
     
-    view.createLayer();
+    view.createElement();
     view.set("layerNeedsUpdate", YES);
   }
   
@@ -129,7 +129,7 @@ test("layerNeedsUpdate actually triggers updateLayer", function() {
     isVisibleInWindow: YES,
     updateLayer: function() { callCount++; }
   });
-  view.createLayer();
+  view.createElement();
   
   SC.RunLoop.begin();
   view.set('layerNeedsUpdate', YES);

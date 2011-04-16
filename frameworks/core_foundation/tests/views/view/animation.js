@@ -15,7 +15,7 @@
 var view, pane, originalSupportsTransitions = SC.platform.supportsCSSTransitions;
 
 function styleFor(view) {
-  return view.get('layer').style;
+  return view.get('element').style;
 }
 
 function transitionFor(view){

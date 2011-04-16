@@ -1,3 +1,4 @@
+sc_require("views/core_view");
 sc_require("ext/handlebars");
 sc_require("ext/handlebars/bind");
 sc_require("ext/handlebars/collection");
@@ -24,13 +25,8 @@ SC.TEMPLATES = SC.Object.create();
   @extends SC.CoreView
   @since SproutCore 1.5
 */
-SC.TemplateView = SC.CoreView.extend(
+SC.TemplateView = SC.View.extend(
 /** @scope SC.TemplateView.prototype */ {
-
-  // This makes it easier to build custom views on top of TemplateView without
-  // gotchas, but may have tab navigation repercussions. The tab navigation
-  // system should be revisited.
-  acceptsFirstResponder: YES,
 
   /**
     The name of the template to lookup if no template is provided.
