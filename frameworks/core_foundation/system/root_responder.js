@@ -1,4 +1,45 @@
 SC.RootResponder = SC.Object.extend({
+  setup: function() {
+    var event, events = {
+      touchstart  : 'touchStart',
+      touchmove   : 'touchMove',
+      touchend    : 'touchEnd',
+      touchcancel : 'touchCancel',
+      keydown     : 'keyDown',
+      keyup       : 'keyUp',
+      keypress    : 'keyPress',
+      mousedown   : 'mouseDown',
+      mouseup     : 'mouseUp',
+      click       : 'click',
+      dblclick    : 'doubleClick',
+      mousemove   : 'mouseMove',
+      focusin     : 'focusIn',
+      focusout    : 'focusOut',
+      mouseenter  : 'mouseEntered',
+      mouseleave  : 'mouseExited',
+      change      : 'change'
+    };
+
+    for (event in events) {
+      if (events.hasOwnProperty(event)) {
+        this.setupHandler(event, events[event]);
+      }
+    }
+  },
+
+  setupHandler: function(event, eventName) {
+    SC.$(document).delegate('.sc-view', event, function(evt) {
+      var view = SC.View.views[this.id];
+      var handler = view[eventName];
+      var result;
+
+      if (SC.typeOf(handler) === SC.T_FUNCTION) {
+        result = handler.call(view, evt);
+        if (result === true) { return false; }
+      }
+    });
+  },
+
   /**
     Route an action message to the appropriate responder.  This method will
     walk the responder chain, attempting to find a responder that implements
@@ -84,5 +125,6 @@ SC.RootResponder = SC.Object.extend({
   an instance and sets up event listeners as needed.
 */
 SC.ready(SC.RootResponder, function() {
-  SC.RootResponder.responder = SC.RootResponder.create() ;
+  var r = SC.RootResponder.responder = SC.RootResponder.create() ;
+  r.setup();
 });
