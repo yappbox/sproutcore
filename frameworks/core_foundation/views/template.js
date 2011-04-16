@@ -1,3 +1,4 @@
+sc_require("system/ready");
 sc_require("views/core_view");
 sc_require("ext/handlebars");
 sc_require("ext/handlebars/bind");
@@ -124,4 +125,12 @@ SC.TemplateView = SC.View.extend(
     if (this.mouseUp) { return YES; }
     return NO;
   }
+});
+
+SC.ready(function() {
+  SC.$('script[type="text/x-sc-template"]').each(function() {
+    var templateName = SC.$(this).attr('data-sc-template');
+    SC.TEMPLATES[templateName] = SC.Handlebars.compile(SC.$(this).html());
+    SC.$(this).remove();
+  });
 });
