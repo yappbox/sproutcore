@@ -4,7 +4,7 @@
 //            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-
+SC.browser = {};
 /**
   The Locale defined information about a specific locale, including date and
   number formatting conventions, and localization strings.  You can define
