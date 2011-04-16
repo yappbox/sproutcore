@@ -165,7 +165,6 @@ test("SC.TemplateView should update when a property changes and the bind helper 
   equals(view.$('#first').text(), "bam", "precond - view renders Handlebars template");
 
   SC.run(function() { view.get('content').set('wham', 'bazam'); });
-
   equals(view.$('#first').text(), "bazam", "view updates when a bound property changes");
 });
 
@@ -520,45 +519,7 @@ test("Template views return a no-op function if their template cannot be found",
   equals(template(), '', 'should return an empty string');
 });
 
-test("Template views can belong to a pane and a parent view", function() {
-  var templates = SC.Object.create({
-    toDo: SC.Handlebars.compile('<h1>{{title}}</h1> (Created at {{createdAt}})')
-  });
-
-  var didCreateLayerWasCalled = NO;
-
-  var pane = SC.MainPane.design({
-    childViews: ['container'],
-
-    container: SC.View.design({
-      childViews: ['normalView', 'template'],
-
-      normalView: SC.View,
-
-      template: SC.TemplateView.design({
-        templates: templates,
-
-        templateName: 'toDo',
-        title: 'Do dishes',
-        createdAt: "Today",
-
-        didCreateLayer: function() {
-          didCreateLayerWasCalled = YES;
-        }
-      })
-    })
-  });
-
-  pane = pane.create().append();
-
-  equals(pane.$().children().length, 1, "pane has one child DOM element");
-  equals(pane.$().children().children().length, 2, "container view has two child DOM elements");
-  equals(pane.$().children().children().eq(1).text(), "Do dishes (Created at Today)", "renders template to the correct DOM element");
-  ok(didCreateLayerWasCalled, "didCreateLayer gets called on a template view after it gets rendered");
-  pane.remove();
-});
-
-test("Template views add a layerId to child views created using the view helper", function() {
+test("Template views add an elementId to child views created using the view helper", function() {
   var templates = SC.Object.create({
     parent: SC.Handlebars.compile('<aside>{{view "TemplateTests.ChildView"}}</aside>'),
     child: SC.Handlebars.compile("I can't believe it's not butter.")
@@ -576,7 +537,7 @@ test("Template views add a layerId to child views created using the view helper"
 
   view.createElement();
   var childView = view.getPath('childViews.firstObject');
-  equals(view.$().children().first().children().first().attr('id'), childView.get('layerId'));
+  equals(view.$().children().first().children().first().attr('id'), childView.get('elementId'));
 });
 
 test("Template views set the template of their children to a passed block", function() {

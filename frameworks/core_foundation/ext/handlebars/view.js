@@ -28,7 +28,7 @@ SC.Handlebars.ViewHelper = SC.Object.create({
       if (!newView) { throw "Unable to find view at path '" + path + "'"; }
     }
 
-    if (hash.id) { hash.layerId = hash.id; }
+    if (hash.id) { hash.elementId = hash.id; }
 
     var contextOptions = {
       'id': hash.id,
@@ -77,7 +77,7 @@ SC.Handlebars.ViewHelper = SC.Object.create({
     }
 
     if (id) {
-      childView.set('layerId', id);
+      childView.set('elementId', id);
       context.id(id);
     }
 
