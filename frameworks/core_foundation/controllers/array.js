@@ -6,7 +6,6 @@
 // ==========================================================================
 
 sc_require('controllers/controller');
-sc_require('mixins/selection_support');
 
 /**
   @class
@@ -27,7 +26,7 @@ sc_require('mixins/selection_support');
   @author Charles Jolley
   @since SproutCore 1.0
 */
-SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
+SC.ArrayController = SC.Controller.extend(SC.Array,
 /** @scope SC.ArrayController.prototype */ {
 
   // ..........................................................
@@ -411,7 +410,6 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     this.arrayContentDidChange(start, removed, added);
     var addedObjects = this.slice(start, start+added);
     this.setupEnumerablePropertyChains(addedObjects);
-    this.updateSelectionAfterContentChange();
   },
 
   /** @private
@@ -487,7 +485,6 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     this._scac_length = newlen;
     this._scac_contentStatusDidChange();
     this.arrayContentDidChange(0, 0, newlen);
-    this.updateSelectionAfterContentChange();
   }.observes('content'),
 
   /**
@@ -527,7 +524,6 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     // invalidate the whole array.
     this.arrayContentDidChange(0, oldlen, newlen);
     this.endPropertyChanges();
-    this.updateSelectionAfterContentChange();
   }.observes('orderBy'),
 
   /** @private
