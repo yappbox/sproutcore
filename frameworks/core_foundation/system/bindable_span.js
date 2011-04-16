@@ -158,6 +158,7 @@ SC._BindableSpan = SC.TemplateView.extend({
     elem = context.element();
     this.$().replaceWith(elem);
     this.set('element', elem);
+    this._notifyDidCreateElement();
   }
 });
 

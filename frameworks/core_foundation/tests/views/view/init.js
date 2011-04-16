@@ -10,7 +10,7 @@ module("SC.View#init");
 
 test("registers view in the global views hash using layerId for event targeted", function() {
   var v = SC.View.create();
-  equals(SC.View.views[v.get('layerId')], v, 'registers view');
+  equals(SC.View.views[v.get('elementId')], v, 'registers view');
 });
 
 test("adds displayDidChange observer on all display properties", function() {
