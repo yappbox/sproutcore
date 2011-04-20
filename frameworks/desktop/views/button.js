@@ -66,8 +66,8 @@ SC.ButtonView = SC.View.extend(SC.Control,
     @default YES
   */
   acceptsFirstResponder: function() {
-    if(!SC.SAFARI_FOCUS_BEHAVIOR) return this.get('isEnabled');
-    else return NO;
+    if (SC.FOCUS_ALL_CONTROLS) { return this.get('isEnabled'); }
+    return NO;
   }.property('isEnabled'),
 
   /**
@@ -210,7 +210,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
   */
   displayTitle: function() {
     var ret = this.get('title');
-    return (ret && this.get('localize')) ? ret.loc() : (ret || '');
+    return (ret && this.get('localize')) ? SC.String.loc(ret) : (ret || '');
   }.property('title','localize').cacheable(),
   
   /**

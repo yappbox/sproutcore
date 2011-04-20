@@ -6,6 +6,18 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
   template: SC.Handlebars.compile(''),
   emptyView: null,
 
+  /**
+    @private
+    When the view is initialized, set up array observers on the content array.
+
+    @returns SC.TemplateCollectionView
+  */
+  init: function() {
+    var templateCollectionView = sc_super();
+    this._sctcv_contentDidChange();
+    return templateCollectionView;
+  },
+
   // In case a default content was set, trigger the child view creation
   // as soon as the empty layer was created
   didCreateLayer: function() {
@@ -81,10 +93,6 @@ SC.TemplateCollectionView = SC.TemplateView.extend({
     needed.
   */
   _sctcv_contentDidChange: function() {
-    this.get('childViews').forEach(function() {
-      this.removeChild(view);
-      view.destroy();
-    }, this);
 
     this.$().empty();
 

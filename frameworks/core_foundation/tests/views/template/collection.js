@@ -4,6 +4,8 @@
 //            ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+/*globals TemplateTests */
+
 module("SC.TemplateCollectionView");
 
 TemplateTests = {};
@@ -24,7 +26,7 @@ test("creating a collection view works", function() {
   var ulCollectionView  = CollectionView.create({ tagName: "ul" });
   var olCollectionView  = CollectionView.create({ tagName: "ol" });
   var dlCollectionView  = CollectionView.create({ tagName: "dl", itemView: DefinitionTermChildView });
-  var customTagCollectionView = CollectionView.create({ tagName: "p" })
+  var customTagCollectionView = CollectionView.create({ tagName: "p" });
   
   defaultCollectionView.createLayer();
   ulCollectionView.createLayer();
@@ -46,6 +48,22 @@ test("creating a collection view works", function() {
   
   ok(customTagCollectionView.$().is("p"), "Paragraph collection view was rendered");
   equals(customTagCollectionView.$('div').length, 1, "Child view was rendered");
+});
+
+test("not passing a block to the collection helper creates a collection", function() {
+  TemplateTests.CollectionTestView = SC.TemplateCollectionView.create({
+    content: ['foo', 'bar', 'baz'],
+    itemView: SC.TemplateView.design({
+      template: SC.Handlebars.compile('<aside></aside>')
+    })
+  });
+
+  var view = SC.TemplateView.create({
+    template: SC.Handlebars.compile('{{collection "TemplateTests.CollectionTestView"}}')
+  });
+
+  view.createLayer();
+  equals(view.$('aside').length, 3, 'one aside element is created for each content item');
 });
 
 test("passing a block to the collection helper sets it as the template for example views", function() {
@@ -171,7 +189,31 @@ test("should pass content as context when using {{#each}} helper", function() {
                   name: 'Leopard' } ]
   });
 
-  view.createLayer();
+  SC.run(function() { view.createLayer(); });
 
   equals(view.$().text(), "Mac OS X 10.7: Lion Mac OS X 10.6: Snow Leopard Mac OS X 10.5: Leopard ", "prints each item in sequence");
+});
+
+test("should re-render when the content object changes", function() {
+  TemplateTests.RerenderTest = SC.TemplateCollectionView.extend({
+    content: []
+  });
+
+  var view = SC.TemplateView.create({
+    template: SC.Handlebars.compile('{{#collection TemplateTests.RerenderTest}}{{content}}{{/collection}}')
+  });
+
+  view.createLayer();
+
+  SC.run(function() {
+    view.childViews[0].set('content', ['bing', 'bat', 'bang']);
+  });
+
+  SC.run(function() {
+    view.childViews[0].set('content', ['ramalamadingdong']);
+  });
+
+  equals(view.$('li').length, 1, "rerenders with correct number of items");
+  equals(view.$('li:eq(0)').text(), "ramalamadingdong");
+
 });

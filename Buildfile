@@ -34,23 +34,14 @@ config :'datetime/core', :required => [:runtime]
 config :datetime,        :required => [:'datetime/core']
 config :core_foundation, :required => [:runtime, :handlebars]
 config :'datetime/localized', :required => [:core_foundation]
-config :foundation,      :required => [:core_foundation, :datetime, :'datetime/localized']
+config :foundation,      :required => [:core_foundation, :datetime, :'datetime/localized', :ajax]
 config :datastore,       :required => [:runtime, :datetime]
 config :desktop,         :required => [:foundation]
 config :media,           :required => [:desktop]
 config :statechart,      :required => [:core_foundation], :test_required => [:core_foundation, :desktop]
-
-# APP-LEVEL FRAMEWORKS
-%w(mobile designer).each do |app_framework|
-  config app_framework, :required => [:runtime, :datastore, :foundation]
-end
-
-config :mobile, 
-  :layout         => 'sproutcore/mobile:lib/index.rhtml',
-  :test_layout    => 'sproutcore/mobile:lib/index.rhtml'
+config :ajax,            :required => [:runtime, :core_foundation]
 
 # WRAPPER FRAMEWORKS
-config :designer, :required => [:runtime, :foundation, :desktop]
 config :sproutcore, :required => [:desktop, :datastore]
 config :mini, :required => [:runtime, :datastore]
 config :animation, :required => :foundation
@@ -101,7 +92,7 @@ config :core_tools, :required => [
 #   config :core_tools, :combine_javascript => false
 # end
 
-%w(tests test_controls docs welcome).each do |app_target|
+%w(tests test_controls welcome).each do |app_target|
   config app_target, 
     :required => [:desktop, :datastore, :core_tools],
     :theme => :ace
@@ -111,8 +102,3 @@ config :core_tools, :required => [
   # end
 
 end
-
-config :greenhouse, 
-  :required => [:sproutcore, :'sproutcore/designer', :statechart],
-  :theme => :ace,
-  :css_theme    => 'ace.greenhouse'

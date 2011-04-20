@@ -18,6 +18,17 @@
     value: 'John Doe'
   })
   
+  .add("password", SC.TextFieldView, {
+    isPassword: YES,
+    value: "I'm so secret"
+  })
+  
+  .add("password-hint", SC.TextFieldView, {
+    hint: "Passwerd",
+    isPassword: YES,
+    value: "I'm so secret"
+  })
+  
   .add("disabled - empty", SC.TextFieldView, { 
     hint: "Full Name", 
     value: null,
@@ -92,7 +103,7 @@ pane.verifyEmpty = function verifyEmpty(view, expectedHint) {
   var layer = view.$();
   
   ok(!layer.hasClass('not-empty'), 'layer should not have not-empty class');
-  if(SC.browser.webkit) equals(input.val(), '', 'input should have empty value');
+  if(SC.browser.webkit || parseInt(SC.browser.mozilla) >= 2.0) equals(input.val(), '', 'input should have empty value');
   else equals(input.val(), expectedHint, 'input should have empty value');
   if (expectedHint) {
     var hint = view.$('.sc-hint');
@@ -154,6 +165,18 @@ test("empty", function() {
 test("with value", function() {
   var view = pane.view('with value');
   pane.verifyNotEmpty(view, 'John Doe', 'Full Name');
+  pane.verifyDisabled(view, NO);
+});
+
+test("password", function() {
+  var view = pane.view('password');
+  pane.verifyNotEmpty(view, 'I\'m so secret');
+  pane.verifyDisabled(view, NO);
+});
+
+test("password with hint", function() {
+  var view = pane.view('password-hint');
+  pane.verifyNotEmpty(view, 'I\'m so secret', 'Passwerd');
   pane.verifyDisabled(view, NO);
 });
 
@@ -237,6 +260,20 @@ test("enabling disabled view", function() {
   SC.RunLoop.end();
   pane.verifyDisabled(view, NO);
 });
+
+if (!SC.browser.isIE && !SC.platform.input.placeholder) {
+  test("Changing value to null -- password field", function() {
+    var view = pane.view('password-hint'),
+        input = view.$('input');
+
+    SC.run(function() {
+      view.set('value', null);
+    });
+
+    equals(input.attr('type'), 'text', "When nulled out, field was converted to type text");
+    equals(input.val(), view.get('hint'), "When nulled out, field was given value equal to hint");
+  });
+}
 
 // ..........................................................
 // TEST SELECTION SUPPORT

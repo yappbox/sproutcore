@@ -60,7 +60,7 @@ SC.Animatable = {
 
   // properties that adjust should relay to style
   _styleProperties: [ "display", "transform" ],
-  _layoutStyles: 'width height top bottom marginLeft marginTop left right zIndex minWidth maxWidth minHeight maxHeight centerX centerY opacity border borderTop borderRight borderBottom borderLeft'.w(),
+  _layoutStyles: SC.String.w('width height top bottom marginLeft marginTop left right zIndex minWidth maxWidth minHeight maxHeight centerX centerY opacity border borderTop borderRight borderBottom borderLeft'),
 
   // we cache this dictionary so we don't generate a new one each time we make
   // a new animation. It is used so we can start the animations in order—
@@ -137,13 +137,13 @@ SC.Animatable = {
   _animatable_didCreateLayer: function(){
     this.resetAnimation();
     SC.Event.add(this.get('layer'), SC.platform.cssPrefix+"TransitionEnd", this, this.transitionEnd);
-    SC.Event.add(this.get('layer'), "transitionEnd", this, this.transitionEnd);
+    SC.Event.add(this.get('layer'), "transitionend", this, this.transitionEnd);
     return this._animatable_original_didCreateLayer();
   },
 
   _animatable_willDestroyLayer: function(){
     SC.Event.remove(this.get('layer'), SC.platform.cssPrefix+"TransitionEnd", this, this.transitionEnd);
-    SC.Event.remove(this.get('layer'), "transitionEnd", this, this.transitionEnd);
+    SC.Event.remove(this.get('layer'), "transitionend", this, this.transitionEnd);
     return this._animatable_original_willDestroyLayer();
   },
 
