@@ -438,7 +438,7 @@ parser.lexer = lexer;
 return parser;
 })();
 // lib/handlebars/base.js
-var Handlebars = {};
+Handlebars = {};
 
 Handlebars.Parser = handlebars;
 
