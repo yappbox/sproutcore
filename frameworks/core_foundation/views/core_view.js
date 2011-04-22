@@ -106,6 +106,20 @@ SC.CoreView = SC.Responder.extend(
   },
 
   /**
+    Appends another SC.View as this view's child.
+
+    @param {SC.View} view the view to append
+    @returns {SC.View} receiver
+  */
+  appendChild: function(view) {
+    view.appendTo(this.$());
+    this.get('childViews').pushObject(view);
+    view.set('parentView', this);
+
+    return this;
+  },
+
+  /**
     Removes the view's element from the element to which it is attached.
 
     @returns {SC.View} receiver
