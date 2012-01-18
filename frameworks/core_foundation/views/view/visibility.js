@@ -61,8 +61,8 @@ SC.View.reopen(
     if (previous !== current) {
       this.set('isVisibleInWindow', current);
 
-      var childViews = this.get('childViews'), len = childViews.length, idx, view;
-      for(idx=0;idx<len;idx++) {
+      var childViews = this.get('childViews'), idx, view;
+      for(idx=0;idx<childViews.length;idx++) {
         view = childViews[idx];
         if(view.recomputeIsVisibleInWindow) { view.recomputeIsVisibleInWindow(current); }
       }
